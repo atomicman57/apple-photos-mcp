@@ -66,3 +66,29 @@ A client whose session was closed gets a 404 and re-initializes.
   `WWW-Authenticate: Bearer`.
 - All sessions share one `PhotosManager` and one persistent sidecar. The
   library is parsed once at startup (warmup), not on the first client call.
+
+## Full Disk Access (required for LaunchAgent)
+
+Under `launchd`, macOS does not grant the Photos library DB to bare `node`.
+A helper app is at `~/Applications/ApplePhotosMCP.app` (bundle id
+`com.blessingphilips.apple-photos-mcp`).
+
+1. System Settings → Privacy & Security → Full Disk Access → +
+2. Add `~/Applications/ApplePhotosMCP.app` (enable the toggle).
+3. Then:
+   ```bash
+   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.blessingphilips.apple-photos-mcp.plist
+   # or: launchctl kickstart -k gui/$(id -u)/com.blessingphilips.apple-photos-mcp
+   ```
+4. Confirm `[warmup] sidecar ready` in `~/Library/Logs/apple-photos-mcp/stderr.log`.
+
+Until FDA is granted, run the HTTP server from an agent/Terminal session that
+already can read the library (see `run-mcp.sh`).
+
+## Cloudflare tunnel (photos-mcp.closecompanion.app)
+
+- Tunnel name: `apple-photos-mcp` (remotely managed config)
+- LaunchAgent: `com.blessingphilips.apple-photos-mcp-tunnel`
+- Wrapper: `scripts/hosting/run-cloudflared.sh` (token from keychain account `tunnel-token`)
+- Origin: `http://127.0.0.1:8788`
+- Do not modify other closecompanion tunnels.
