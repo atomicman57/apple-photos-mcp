@@ -411,11 +411,11 @@ var require_codegen = __commonJS({
         const rhs = this.rhs === void 0 ? "" : ` = ${this.rhs}`;
         return `${varKind} ${this.name}${rhs};` + _n;
       }
-      optimizeNames(names, constants) {
+      optimizeNames(names, constants2) {
         if (!names[this.name.str])
           return;
         if (this.rhs)
-          this.rhs = optimizeExpr(this.rhs, names, constants);
+          this.rhs = optimizeExpr(this.rhs, names, constants2);
         return this;
       }
       get names() {
@@ -432,10 +432,10 @@ var require_codegen = __commonJS({
       render({ _n }) {
         return `${this.lhs} = ${this.rhs};` + _n;
       }
-      optimizeNames(names, constants) {
+      optimizeNames(names, constants2) {
         if (this.lhs instanceof code_1.Name && !names[this.lhs.str] && !this.sideEffects)
           return;
-        this.rhs = optimizeExpr(this.rhs, names, constants);
+        this.rhs = optimizeExpr(this.rhs, names, constants2);
         return this;
       }
       get names() {
@@ -496,8 +496,8 @@ var require_codegen = __commonJS({
       optimizeNodes() {
         return `${this.code}` ? this : void 0;
       }
-      optimizeNames(names, constants) {
-        this.code = optimizeExpr(this.code, names, constants);
+      optimizeNames(names, constants2) {
+        this.code = optimizeExpr(this.code, names, constants2);
         return this;
       }
       get names() {
@@ -526,12 +526,12 @@ var require_codegen = __commonJS({
         }
         return nodes.length > 0 ? this : void 0;
       }
-      optimizeNames(names, constants) {
+      optimizeNames(names, constants2) {
         const { nodes } = this;
         let i = nodes.length;
         while (i--) {
           const n = nodes[i];
-          if (n.optimizeNames(names, constants))
+          if (n.optimizeNames(names, constants2))
             continue;
           subtractNames(names, n.names);
           nodes.splice(i, 1);
@@ -584,12 +584,12 @@ var require_codegen = __commonJS({
           return void 0;
         return this;
       }
-      optimizeNames(names, constants) {
+      optimizeNames(names, constants2) {
         var _a3;
-        this.else = (_a3 = this.else) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names, constants);
-        if (!(super.optimizeNames(names, constants) || this.else))
+        this.else = (_a3 = this.else) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names, constants2);
+        if (!(super.optimizeNames(names, constants2) || this.else))
           return;
-        this.condition = optimizeExpr(this.condition, names, constants);
+        this.condition = optimizeExpr(this.condition, names, constants2);
         return this;
       }
       get names() {
@@ -612,10 +612,10 @@ var require_codegen = __commonJS({
       render(opts) {
         return `for(${this.iteration})` + super.render(opts);
       }
-      optimizeNames(names, constants) {
-        if (!super.optimizeNames(names, constants))
+      optimizeNames(names, constants2) {
+        if (!super.optimizeNames(names, constants2))
           return;
-        this.iteration = optimizeExpr(this.iteration, names, constants);
+        this.iteration = optimizeExpr(this.iteration, names, constants2);
         return this;
       }
       get names() {
@@ -651,10 +651,10 @@ var require_codegen = __commonJS({
       render(opts) {
         return `for(${this.varKind} ${this.name} ${this.loop} ${this.iterable})` + super.render(opts);
       }
-      optimizeNames(names, constants) {
-        if (!super.optimizeNames(names, constants))
+      optimizeNames(names, constants2) {
+        if (!super.optimizeNames(names, constants2))
           return;
-        this.iterable = optimizeExpr(this.iterable, names, constants);
+        this.iterable = optimizeExpr(this.iterable, names, constants2);
         return this;
       }
       get names() {
@@ -696,11 +696,11 @@ var require_codegen = __commonJS({
         (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNodes();
         return this;
       }
-      optimizeNames(names, constants) {
+      optimizeNames(names, constants2) {
         var _a3, _b;
-        super.optimizeNames(names, constants);
-        (_a3 = this.catch) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names, constants);
-        (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNames(names, constants);
+        super.optimizeNames(names, constants2);
+        (_a3 = this.catch) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names, constants2);
+        (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNames(names, constants2);
         return this;
       }
       get names() {
@@ -1001,7 +1001,7 @@ var require_codegen = __commonJS({
     function addExprNames(names, from) {
       return from instanceof code_1._CodeOrName ? addNames(names, from.names) : names;
     }
-    function optimizeExpr(expr, names, constants) {
+    function optimizeExpr(expr, names, constants2) {
       if (expr instanceof code_1.Name)
         return replaceName(expr);
       if (!canOptimize(expr))
@@ -1016,14 +1016,14 @@ var require_codegen = __commonJS({
         return items;
       }, []));
       function replaceName(n) {
-        const c = constants[n.str];
+        const c = constants2[n.str];
         if (c === void 0 || names[n.str] !== 1)
           return n;
         delete names[n.str];
         return c;
       }
       function canOptimize(e) {
-        return e instanceof code_1._Code && e._items.some((c) => c instanceof code_1.Name && names[c.str] === 1 && constants[c.str] !== void 0);
+        return e instanceof code_1._Code && e._items.some((c) => c instanceof code_1.Name && names[c.str] === 1 && constants2[c.str] !== void 0);
       }
     }
     function subtractNames(names, from) {
@@ -4605,8 +4605,8 @@ var require_core = __commonJS({
             return this;
           }
           case "object": {
-            const cacheKey = schemaKeyRef;
-            this._cache.delete(cacheKey);
+            const cacheKey2 = schemaKeyRef;
+            this._cache.delete(cacheKey2);
             let id = schemaKeyRef[this.opts.schemaId];
             if (id) {
               id = (0, resolve_1.normalizeId)(id);
@@ -7253,6 +7253,110 @@ var require_dist = __commonJS({
     module.exports = exports = formatsPlugin;
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = formatsPlugin;
+  }
+});
+
+// node_modules/.pnpm/content-type@1.0.5/node_modules/content-type/index.js
+var require_content_type = __commonJS({
+  "node_modules/.pnpm/content-type@1.0.5/node_modules/content-type/index.js"(exports) {
+    "use strict";
+    var PARAM_REGEXP = /; *([!#$%&'*+.^_`|~0-9A-Za-z-]+) *= *("(?:[\u000b\u0020\u0021\u0023-\u005b\u005d-\u007e\u0080-\u00ff]|\\[\u000b\u0020-\u00ff])*"|[!#$%&'*+.^_`|~0-9A-Za-z-]+) */g;
+    var TEXT_REGEXP = /^[\u000b\u0020-\u007e\u0080-\u00ff]+$/;
+    var TOKEN_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
+    var QESC_REGEXP = /\\([\u000b\u0020-\u00ff])/g;
+    var QUOTE_REGEXP = /([\\"])/g;
+    var TYPE_REGEXP = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+\/[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
+    exports.format = format;
+    exports.parse = parse4;
+    function format(obj) {
+      if (!obj || typeof obj !== "object") {
+        throw new TypeError("argument obj is required");
+      }
+      var parameters = obj.parameters;
+      var type = obj.type;
+      if (!type || !TYPE_REGEXP.test(type)) {
+        throw new TypeError("invalid type");
+      }
+      var string4 = type;
+      if (parameters && typeof parameters === "object") {
+        var param;
+        var params = Object.keys(parameters).sort();
+        for (var i = 0; i < params.length; i++) {
+          param = params[i];
+          if (!TOKEN_REGEXP.test(param)) {
+            throw new TypeError("invalid parameter name");
+          }
+          string4 += "; " + param + "=" + qstring(parameters[param]);
+        }
+      }
+      return string4;
+    }
+    function parse4(string4) {
+      if (!string4) {
+        throw new TypeError("argument string is required");
+      }
+      var header = typeof string4 === "object" ? getcontenttype(string4) : string4;
+      if (typeof header !== "string") {
+        throw new TypeError("argument string is required to be a string");
+      }
+      var index = header.indexOf(";");
+      var type = index !== -1 ? header.slice(0, index).trim() : header.trim();
+      if (!TYPE_REGEXP.test(type)) {
+        throw new TypeError("invalid media type");
+      }
+      var obj = new ContentType(type.toLowerCase());
+      if (index !== -1) {
+        var key;
+        var match;
+        var value;
+        PARAM_REGEXP.lastIndex = index;
+        while (match = PARAM_REGEXP.exec(header)) {
+          if (match.index !== index) {
+            throw new TypeError("invalid parameter format");
+          }
+          index += match[0].length;
+          key = match[1].toLowerCase();
+          value = match[2];
+          if (value.charCodeAt(0) === 34) {
+            value = value.slice(1, -1);
+            if (value.indexOf("\\") !== -1) {
+              value = value.replace(QESC_REGEXP, "$1");
+            }
+          }
+          obj.parameters[key] = value;
+        }
+        if (index !== header.length) {
+          throw new TypeError("invalid parameter format");
+        }
+      }
+      return obj;
+    }
+    function getcontenttype(obj) {
+      var header;
+      if (typeof obj.getHeader === "function") {
+        header = obj.getHeader("content-type");
+      } else if (typeof obj.headers === "object") {
+        header = obj.headers && obj.headers["content-type"];
+      }
+      if (typeof header !== "string") {
+        throw new TypeError("content-type header is missing from object");
+      }
+      return header;
+    }
+    function qstring(val) {
+      var str = String(val);
+      if (TOKEN_REGEXP.test(str)) {
+        return str;
+      }
+      if (str.length > 0 && !TEXT_REGEXP.test(str)) {
+        throw new TypeError("invalid parameter value");
+      }
+      return '"' + str.replace(QUOTE_REGEXP, "\\$1") + '"';
+    }
+    function ContentType(type) {
+      this.parameters = /* @__PURE__ */ Object.create(null);
+      this.type = type;
+    }
   }
 });
 
@@ -26535,13 +26639,13 @@ function initializeContext(params) {
     external: params?.external ?? void 0
   };
 }
-function handleUnrepresentable(schema, ctx, json3, params, message) {
+function handleUnrepresentable(schema, ctx, json4, params, message) {
   const result = typeof ctx.unrepresentable === "function" ? ctx.unrepresentable({ zodSchema: schema, path: params.path, message }) : ctx.unrepresentable;
   if (result === "any")
     return false;
   if (result === void 0 || result === "throw")
     throw new Error(message);
-  Object.assign(json3, result);
+  Object.assign(json4, result);
   return true;
 }
 function processSchema(schema, ctx, _params = { path: [], schemaPath: [] }) {
@@ -26777,12 +26881,12 @@ function foldObjects(members2) {
   }
   return folded;
 }
-function foldIntersection(json3) {
-  const allOf = json3.allOf;
+function foldIntersection(json4) {
+  const allOf = json4.allOf;
   if (!Array.isArray(allOf) || allOf.length < 2)
     return;
   for (const key of FOLDABLE_KEYS)
-    if (key in json3)
+    if (key in json4)
       return;
   const unions = allOf.filter((m) => UNION_KEYS.some((k) => Array.isArray(m[k])));
   let folded = null;
@@ -26801,8 +26905,8 @@ function foldIntersection(json3) {
   }
   if (!folded)
     return;
-  delete json3.allOf;
-  assignProps(json3, folded);
+  delete json4.allOf;
+  assignProps(json4, folded);
 }
 function finalize(ctx, schema) {
   const root = ctx.seen.get(schema);
@@ -26884,20 +26988,20 @@ function finalize(ctx, schema) {
     if (ctx.intersections.length) {
       const carriers = /* @__PURE__ */ new Map();
       for (const seen of ctx.seen.values()) {
-        for (const json3 of [seen.schema, seen.def]) {
-          const allOf = json3?.allOf;
+        for (const json4 of [seen.schema, seen.def]) {
+          const allOf = json4?.allOf;
           if (!Array.isArray(allOf))
             continue;
           const existing = carriers.get(allOf);
           if (existing)
-            existing.push(json3);
+            existing.push(json4);
           else
-            carriers.set(allOf, [json3]);
+            carriers.set(allOf, [json4]);
         }
       }
       for (const allOf of ctx.intersections) {
-        for (const json3 of carriers.get(allOf) ?? [])
-          foldIntersection(json3);
+        for (const json4 of carriers.get(allOf) ?? [])
+          foldIntersection(json4);
       }
     }
   }
@@ -27132,29 +27236,29 @@ var exactPatterns = /* @__PURE__ */ new Map([
 ]);
 var exactPattern = (p) => exactPatterns.get(p) ?? p;
 var stringProcessor = (schema, ctx, _json, _params) => {
-  const json3 = _json;
-  json3.type = "string";
+  const json4 = _json;
+  json4.type = "string";
   const { minimum, maximum, format, patterns, contentEncoding, laxFormat } = aggregateChecks(schema);
   if (typeof minimum === "number")
-    json3.minLength = minimum;
+    json4.minLength = minimum;
   if (typeof maximum === "number")
-    json3.maxLength = maximum;
+    json4.maxLength = maximum;
   if (format) {
-    json3.format = formatMap[format] ?? format;
-    if (json3.format === "")
-      delete json3.format;
+    json4.format = formatMap[format] ?? format;
+    if (json4.format === "")
+      delete json4.format;
     if (format === "time" || laxFormat) {
-      delete json3.format;
+      delete json4.format;
     }
   }
   if (contentEncoding)
-    json3.contentEncoding = contentEncoding;
+    json4.contentEncoding = contentEncoding;
   if (patterns && patterns.size > 0) {
     const patternList = [...patterns].map(exactPattern);
     if (patternList.length === 1)
-      json3.pattern = patternList[0].source;
+      json4.pattern = patternList[0].source;
     else if (patternList.length > 1) {
-      json3.allOf = [
+      json4.allOf = [
         ...patternList.map((regex) => ({
           ...ctx.target === "draft-07" || ctx.target === "draft-04" || ctx.target === "openapi-3.0" ? { type: "string" } : {},
           pattern: regex.source
@@ -27164,31 +27268,31 @@ var stringProcessor = (schema, ctx, _json, _params) => {
   }
 };
 var numberProcessor = (schema, ctx, _json, params) => {
-  const json3 = _json;
+  const json4 = _json;
   const { minimum, maximum, multipleOf, exclusiveMaximum, exclusiveMinimum, isInt } = aggregateChecks(schema);
-  json3.type = isInt ? "integer" : "number";
+  json4.type = isInt ? "integer" : "number";
   const exMin = typeof exclusiveMinimum === "number" && exclusiveMinimum >= (minimum ?? Number.NEGATIVE_INFINITY);
   const exMax = typeof exclusiveMaximum === "number" && exclusiveMaximum <= (maximum ?? Number.POSITIVE_INFINITY);
   const legacy = ctx.target === "draft-04" || ctx.target === "openapi-3.0";
   if (exMin) {
     if (legacy) {
-      json3.minimum = exclusiveMinimum;
-      json3.exclusiveMinimum = true;
+      json4.minimum = exclusiveMinimum;
+      json4.exclusiveMinimum = true;
     } else {
-      json3.exclusiveMinimum = exclusiveMinimum;
+      json4.exclusiveMinimum = exclusiveMinimum;
     }
   } else if (typeof minimum === "number") {
-    json3.minimum = minimum;
+    json4.minimum = minimum;
   }
   if (exMax) {
     if (legacy) {
-      json3.maximum = exclusiveMaximum;
-      json3.exclusiveMaximum = true;
+      json4.maximum = exclusiveMaximum;
+      json4.exclusiveMaximum = true;
     } else {
-      json3.exclusiveMaximum = exclusiveMaximum;
+      json4.exclusiveMaximum = exclusiveMaximum;
     }
   } else if (typeof maximum === "number") {
-    json3.maximum = maximum;
+    json4.maximum = maximum;
   }
   if (multipleOf) {
     const divisors = /* @__PURE__ */ new Set();
@@ -27196,75 +27300,75 @@ var numberProcessor = (schema, ctx, _json, params) => {
       if (Number.isFinite(divisor) && divisor !== 0)
         divisors.add(Math.abs(divisor));
       else
-        handleUnrepresentable(schema, ctx, json3, params, `A multipleOf divisor of ${divisor} cannot be represented in JSON Schema`);
+        handleUnrepresentable(schema, ctx, json4, params, `A multipleOf divisor of ${divisor} cannot be represented in JSON Schema`);
     }
     const [first, ...rest] = divisors;
     if (first !== void 0)
-      json3.multipleOf = first;
+      json4.multipleOf = first;
     if (rest.length)
-      json3.allOf = [...json3.allOf ?? [], ...rest.map((m) => ({ multipleOf: m }))];
+      json4.allOf = [...json4.allOf ?? [], ...rest.map((m) => ({ multipleOf: m }))];
   }
 };
-var booleanProcessor = (_schema, _ctx, json3, _params) => {
-  json3.type = "boolean";
+var booleanProcessor = (_schema, _ctx, json4, _params) => {
+  json4.type = "boolean";
 };
-var bigintProcessor = (schema, ctx, json3, params) => {
-  handleUnrepresentable(schema, ctx, json3, params, "BigInt cannot be represented in JSON Schema");
+var bigintProcessor = (schema, ctx, json4, params) => {
+  handleUnrepresentable(schema, ctx, json4, params, "BigInt cannot be represented in JSON Schema");
 };
-var symbolProcessor = (schema, ctx, json3, params) => {
-  handleUnrepresentable(schema, ctx, json3, params, "Symbols cannot be represented in JSON Schema");
+var symbolProcessor = (schema, ctx, json4, params) => {
+  handleUnrepresentable(schema, ctx, json4, params, "Symbols cannot be represented in JSON Schema");
 };
-var nullProcessor = (_schema, ctx, json3, _params) => {
+var nullProcessor = (_schema, ctx, json4, _params) => {
   if (ctx.target === "openapi-3.0") {
-    json3.type = "string";
-    json3.nullable = true;
-    json3.enum = [null];
+    json4.type = "string";
+    json4.nullable = true;
+    json4.enum = [null];
   } else {
-    json3.type = "null";
+    json4.type = "null";
   }
 };
-var undefinedProcessor = (schema, ctx, json3, params) => {
-  handleUnrepresentable(schema, ctx, json3, params, "Undefined cannot be represented in JSON Schema");
+var undefinedProcessor = (schema, ctx, json4, params) => {
+  handleUnrepresentable(schema, ctx, json4, params, "Undefined cannot be represented in JSON Schema");
 };
-var voidProcessor = (schema, ctx, json3, params) => {
-  handleUnrepresentable(schema, ctx, json3, params, "Void cannot be represented in JSON Schema");
+var voidProcessor = (schema, ctx, json4, params) => {
+  handleUnrepresentable(schema, ctx, json4, params, "Void cannot be represented in JSON Schema");
 };
-var neverProcessor = (_schema, _ctx, json3, _params) => {
-  json3.not = {};
+var neverProcessor = (_schema, _ctx, json4, _params) => {
+  json4.not = {};
 };
 var anyProcessor = (_schema, _ctx, _json, _params) => {
 };
 var unknownProcessor = (_schema, _ctx, _json, _params) => {
 };
-var dateProcessor = (schema, ctx, json3, params) => {
-  handleUnrepresentable(schema, ctx, json3, params, "Date cannot be represented in JSON Schema");
+var dateProcessor = (schema, ctx, json4, params) => {
+  handleUnrepresentable(schema, ctx, json4, params, "Date cannot be represented in JSON Schema");
 };
-var enumProcessor = (schema, _ctx, json3, _params) => {
+var enumProcessor = (schema, _ctx, json4, _params) => {
   const def = schema._zod.def;
   const values = getEnumValues(def.entries);
   if (values.length === 0) {
-    json3.not = {};
+    json4.not = {};
     return;
   }
   if (values.every((v) => typeof v === "number"))
-    json3.type = "number";
+    json4.type = "number";
   if (values.every((v) => typeof v === "string"))
-    json3.type = "string";
-  json3.enum = values;
+    json4.type = "string";
+  json4.enum = values;
 };
-var literalProcessor = (schema, ctx, json3, params) => {
+var literalProcessor = (schema, ctx, json4, params) => {
   const def = schema._zod.def;
   if (def.values.length === 0) {
-    json3.not = {};
+    json4.not = {};
     return;
   }
   const vals = [];
   for (const val of def.values) {
     if (val === void 0) {
-      if (handleUnrepresentable(schema, ctx, json3, params, "Literal `undefined` cannot be represented in JSON Schema"))
+      if (handleUnrepresentable(schema, ctx, json4, params, "Literal `undefined` cannot be represented in JSON Schema"))
         return;
     } else if (typeof val === "bigint") {
-      if (handleUnrepresentable(schema, ctx, json3, params, "BigInt literals cannot be represented in JSON Schema"))
+      if (handleUnrepresentable(schema, ctx, json4, params, "BigInt literals cannot be represented in JSON Schema"))
         return;
       vals.push(Number(val));
     } else {
@@ -27274,37 +27378,37 @@ var literalProcessor = (schema, ctx, json3, params) => {
   if (vals.length === 0) {
   } else if (vals.length === 1) {
     const val = vals[0];
-    json3.type = val === null ? "null" : typeof val;
+    json4.type = val === null ? "null" : typeof val;
     if (ctx.target === "draft-04" || ctx.target === "openapi-3.0") {
-      json3.enum = [val];
+      json4.enum = [val];
     } else {
-      json3.const = val;
+      json4.const = val;
     }
   } else {
     if (vals.every((v) => typeof v === "number"))
-      json3.type = "number";
+      json4.type = "number";
     if (vals.every((v) => typeof v === "string"))
-      json3.type = "string";
+      json4.type = "string";
     if (vals.every((v) => typeof v === "boolean"))
-      json3.type = "boolean";
+      json4.type = "boolean";
     if (vals.every((v) => v === null))
-      json3.type = "null";
-    json3.enum = vals;
+      json4.type = "null";
+    json4.enum = vals;
   }
 };
-var nanProcessor = (schema, ctx, json3, params) => {
-  handleUnrepresentable(schema, ctx, json3, params, "NaN cannot be represented in JSON Schema");
+var nanProcessor = (schema, ctx, json4, params) => {
+  handleUnrepresentable(schema, ctx, json4, params, "NaN cannot be represented in JSON Schema");
 };
-var templateLiteralProcessor = (schema, _ctx, json3, _params) => {
-  const _json = json3;
+var templateLiteralProcessor = (schema, _ctx, json4, _params) => {
+  const _json = json4;
   const pattern = schema._zod.pattern;
   if (!pattern)
     throw new Error("Pattern not found in template literal");
   _json.type = "string";
   _json.pattern = pattern.source;
 };
-var fileProcessor = (schema, _ctx, json3, _params) => {
-  const _json = json3;
+var fileProcessor = (schema, _ctx, json4, _params) => {
+  const _json = json4;
   _json.type = "string";
   _json.format = "binary";
   _json.contentEncoding = "binary";
@@ -27322,34 +27426,34 @@ var fileProcessor = (schema, _ctx, json3, _params) => {
   else
     _json.anyOf = mime.map((m) => ({ contentMediaType: m }));
 };
-var successProcessor = (_schema, _ctx, json3, _params) => {
-  json3.type = "boolean";
+var successProcessor = (_schema, _ctx, json4, _params) => {
+  json4.type = "boolean";
 };
-var customProcessor = (schema, ctx, json3, params) => {
-  handleUnrepresentable(schema, ctx, json3, params, "Custom types cannot be represented in JSON Schema");
+var customProcessor = (schema, ctx, json4, params) => {
+  handleUnrepresentable(schema, ctx, json4, params, "Custom types cannot be represented in JSON Schema");
 };
-var functionProcessor = (schema, ctx, json3, params) => {
-  handleUnrepresentable(schema, ctx, json3, params, "Function types cannot be represented in JSON Schema");
+var functionProcessor = (schema, ctx, json4, params) => {
+  handleUnrepresentable(schema, ctx, json4, params, "Function types cannot be represented in JSON Schema");
 };
-var transformProcessor = (schema, ctx, json3, params) => {
-  handleUnrepresentable(schema, ctx, json3, params, "Transforms cannot be represented in JSON Schema");
+var transformProcessor = (schema, ctx, json4, params) => {
+  handleUnrepresentable(schema, ctx, json4, params, "Transforms cannot be represented in JSON Schema");
 };
-var mapProcessor = (schema, ctx, json3, params) => {
-  handleUnrepresentable(schema, ctx, json3, params, "Map cannot be represented in JSON Schema");
+var mapProcessor = (schema, ctx, json4, params) => {
+  handleUnrepresentable(schema, ctx, json4, params, "Map cannot be represented in JSON Schema");
 };
-var setProcessor = (schema, ctx, json3, params) => {
-  handleUnrepresentable(schema, ctx, json3, params, "Set cannot be represented in JSON Schema");
+var setProcessor = (schema, ctx, json4, params) => {
+  handleUnrepresentable(schema, ctx, json4, params, "Set cannot be represented in JSON Schema");
 };
 var arrayProcessor = (schema, ctx, _json, params) => {
-  const json3 = _json;
+  const json4 = _json;
   const def = schema._zod.def;
   const { minimum, maximum } = aggregateChecks(schema);
   if (typeof minimum === "number")
-    json3.minItems = minimum;
+    json4.minItems = minimum;
   if (typeof maximum === "number")
-    json3.maxItems = maximum;
-  json3.type = "array";
-  json3.items = processSchema(def.element, ctx, {
+    json4.maxItems = maximum;
+  json4.type = "array";
+  json4.items = processSchema(def.element, ctx, {
     ...params,
     path: [...params.path, "items"]
   });
@@ -27365,17 +27469,17 @@ function inputOptin(schema) {
   return schema._zod.optin;
 }
 var objectProcessor = (schema, ctx, _json, params) => {
-  const json3 = _json;
+  const json4 = _json;
   const def = schema._zod.def;
   const shape = def.shape;
   const symbolKeys = Object.getOwnPropertySymbols(shape);
-  if (symbolKeys.length && handleUnrepresentable(schema, ctx, json3, params, "Symbol keys cannot be represented in JSON Schema")) {
+  if (symbolKeys.length && handleUnrepresentable(schema, ctx, json4, params, "Symbol keys cannot be represented in JSON Schema")) {
     return;
   }
-  json3.type = "object";
-  json3.properties = {};
+  json4.type = "object";
+  json4.properties = {};
   for (const key in shape) {
-    assignProp(json3.properties, key, processSchema(shape[key], ctx, {
+    assignProp(json4.properties, key, processSchema(shape[key], ctx, {
       ...params,
       path: [...params.path, "properties", key]
     }));
@@ -27388,21 +27492,21 @@ var objectProcessor = (schema, ctx, _json, params) => {
     }
   }
   if (requiredKeys.length > 0) {
-    json3.required = requiredKeys;
+    json4.required = requiredKeys;
   }
   if (def.catchall?._zod.def.type === "never") {
-    json3.additionalProperties = false;
+    json4.additionalProperties = false;
   } else if (!def.catchall) {
     if (ctx.io === "output")
-      json3.additionalProperties = false;
+      json4.additionalProperties = false;
   } else if (def.catchall) {
-    json3.additionalProperties = processSchema(def.catchall, ctx, {
+    json4.additionalProperties = processSchema(def.catchall, ctx, {
       ...params,
       path: [...params.path, "additionalProperties"]
     });
   }
 };
-var unionProcessor = (schema, ctx, json3, params) => {
+var unionProcessor = (schema, ctx, json4, params) => {
   const def = schema._zod.def;
   const isExclusive = def.inclusive === false;
   const options = def.options.map((x, i) => processSchema(x, ctx, {
@@ -27410,12 +27514,12 @@ var unionProcessor = (schema, ctx, json3, params) => {
     path: [...params.path, isExclusive ? "oneOf" : "anyOf", i]
   }));
   if (isExclusive) {
-    json3.oneOf = options;
+    json4.oneOf = options;
   } else {
-    json3.anyOf = options;
+    json4.anyOf = options;
   }
 };
-var intersectionProcessor = (schema, ctx, json3, params) => {
+var intersectionProcessor = (schema, ctx, json4, params) => {
   const def = schema._zod.def;
   const a = processSchema(def.left, ctx, {
     ...params,
@@ -27430,13 +27534,13 @@ var intersectionProcessor = (schema, ctx, json3, params) => {
     ...isSimpleIntersection(a) ? a.allOf : [a],
     ...isSimpleIntersection(b) ? b.allOf : [b]
   ];
-  json3.allOf = allOf;
+  json4.allOf = allOf;
   ctx.intersections.push(allOf);
 };
 var tupleProcessor = (schema, ctx, _json, params) => {
-  const json3 = _json;
+  const json4 = _json;
   const def = schema._zod.def;
-  json3.type = "array";
+  json4.type = "array";
   const prefixPath = ctx.target === "draft-2020-12" ? "prefixItems" : "items";
   const restPath = ctx.target === "draft-2020-12" ? "items" : ctx.target === "openapi-3.0" ? "items" : "additionalItems";
   const prefixItems = def.items.map((x, i) => processSchema(x, ctx, {
@@ -27458,70 +27562,70 @@ var tupleProcessor = (schema, ctx, _json, params) => {
   const maxItems = def.items.length;
   const isClosed = !def.rest;
   if (ctx.target === "draft-2020-12") {
-    json3.prefixItems = prefixItems;
+    json4.prefixItems = prefixItems;
     if (isClosed) {
-      json3.items = false;
+      json4.items = false;
     } else if (rest) {
-      json3.items = rest;
+      json4.items = rest;
     }
     if (minItems > 0)
-      json3.minItems = minItems;
+      json4.minItems = minItems;
     if (isClosed)
-      json3.maxItems = maxItems;
+      json4.maxItems = maxItems;
   } else if (ctx.target === "openapi-3.0") {
-    json3.items = {
+    json4.items = {
       anyOf: prefixItems
     };
     if (rest) {
-      json3.items.anyOf.push(rest);
+      json4.items.anyOf.push(rest);
     }
     if (minItems > 0)
-      json3.minItems = minItems;
+      json4.minItems = minItems;
     if (isClosed)
-      json3.maxItems = maxItems;
+      json4.maxItems = maxItems;
   } else {
-    json3.items = prefixItems;
+    json4.items = prefixItems;
     if (isClosed) {
-      json3.additionalItems = false;
+      json4.additionalItems = false;
     } else if (rest) {
-      json3.additionalItems = rest;
+      json4.additionalItems = rest;
     }
     if (minItems > 0)
-      json3.minItems = minItems;
+      json4.minItems = minItems;
     if (isClosed)
-      json3.maxItems = maxItems;
+      json4.maxItems = maxItems;
   }
   const { minimum, maximum } = aggregateChecks(schema);
   if (typeof minimum === "number")
-    json3.minItems = minimum;
+    json4.minItems = minimum;
   if (typeof maximum === "number")
-    json3.maxItems = maximum;
+    json4.maxItems = maximum;
 };
-function stringifyKeyNames(bySchema, json3, visited) {
-  if (json3.$ref) {
-    if (visited.has(json3))
-      return json3;
-    visited.add(json3);
-    const def = bySchema.get(json3)?.def;
+function stringifyKeyNames(bySchema, json4, visited) {
+  if (json4.$ref) {
+    if (visited.has(json4))
+      return json4;
+    visited.add(json4);
+    const def = bySchema.get(json4)?.def;
     if (!def)
-      return json3;
+      return json4;
     const inlined = stringifyKeyNames(bySchema, def, visited);
-    return inlined === def ? json3 : inlined;
+    return inlined === def ? json4 : inlined;
   }
   for (const keyword of ["anyOf", "oneOf"]) {
-    const branches = json3[keyword];
+    const branches = json4[keyword];
     if (!Array.isArray(branches))
       continue;
     const mapped = branches.map((branch) => stringifyKeyNames(bySchema, branch, visited));
     if (mapped.some((branch, i) => branch !== branches[i]))
-      json3 = { ...json3, [keyword]: mapped };
+      json4 = { ...json4, [keyword]: mapped };
   }
-  const types = Array.isArray(json3.type) ? json3.type : [json3.type];
+  const types = Array.isArray(json4.type) ? json4.type : [json4.type];
   const numericType = !types.includes("string") && types.some((t) => t === "number" || t === "integer");
-  const values = json3.enum ?? (json3.const !== void 0 ? [json3.const] : void 0);
+  const values = json4.enum ?? (json4.const !== void 0 ? [json4.const] : void 0);
   if (!numericType && !values?.some((v) => typeof v === "number"))
-    return json3;
-  const { minimum, maximum, exclusiveMinimum, exclusiveMaximum, multipleOf, format, id, ...rest } = json3;
+    return json4;
+  const { minimum, maximum, exclusiveMinimum, exclusiveMaximum, multipleOf, format, id, ...rest } = json4;
   if (rest.enum)
     rest.enum = rest.enum.map((v) => typeof v === "number" ? String(v) : v);
   else if (typeof rest.const === "number")
@@ -27561,9 +27665,9 @@ function rewriteKeyNames(ctx) {
   }
 }
 var recordProcessor = (schema, ctx, _json, params) => {
-  const json3 = _json;
+  const json4 = _json;
   const def = schema._zod.def;
-  json3.type = "object";
+  json4.type = "object";
   const keyType = def.keyType;
   const patterns = aggregateChecks(keyType).patterns;
   if (def.mode === "loose" && patterns && patterns.size > 0) {
@@ -27571,13 +27675,13 @@ var recordProcessor = (schema, ctx, _json, params) => {
       ...params,
       path: [...params.path, "patternProperties", "*"]
     });
-    json3.patternProperties = {};
+    json4.patternProperties = {};
     for (const pattern of patterns) {
-      assignProp(json3.patternProperties, exactPattern(pattern).source, valueSchema);
+      assignProp(json4.patternProperties, exactPattern(pattern).source, valueSchema);
     }
   } else {
     if (ctx.target === "draft-07" || ctx.target === "draft-2020-12") {
-      json3.propertyNames = processSchema(def.keyType, ctx, {
+      json4.propertyNames = processSchema(def.keyType, ctx, {
         ...params,
         path: [...params.path, "propertyNames"]
       });
@@ -27589,7 +27693,7 @@ var recordProcessor = (schema, ctx, _json, params) => {
       }
       pending.push(schema);
     }
-    json3.additionalProperties = processSchema(def.valueType, ctx, {
+    json4.additionalProperties = processSchema(def.valueType, ctx, {
       ...params,
       path: [...params.path, "additionalProperties"]
     });
@@ -27599,19 +27703,19 @@ var recordProcessor = (schema, ctx, _json, params) => {
   if (keyValues && !def.partial && !omittableOnInput) {
     const validKeyValues = [...keyValues].filter((v) => typeof v === "string" || typeof v === "number");
     if (validKeyValues.length > 0) {
-      json3.required = validKeyValues.map(String);
+      json4.required = validKeyValues.map(String);
     }
   }
 };
-var nullableProcessor = (schema, ctx, json3, params) => {
+var nullableProcessor = (schema, ctx, json4, params) => {
   const def = schema._zod.def;
   const inner = processSchema(def.innerType, ctx, params);
   const seen = ctx.seen.get(schema);
   if (ctx.target === "openapi-3.0") {
     seen.ref = def.innerType;
-    json3.nullable = true;
+    json4.nullable = true;
   } else {
-    json3.anyOf = [inner, { type: "null" }];
+    json4.anyOf = [inner, { type: "null" }];
   }
 };
 var nonoptionalProcessor = (schema, ctx, _json, params) => {
@@ -27621,7 +27725,7 @@ var nonoptionalProcessor = (schema, ctx, _json, params) => {
   seen.ref = def.innerType;
 };
 var UNREPRESENTABLE_DEFAULT = /* @__PURE__ */ Symbol();
-function serializeDefaultValue(value, schema, ctx, json3, params) {
+function serializeDefaultValue(value, schema, ctx, json4, params) {
   let unrepresentable = false;
   const serialized = JSON.stringify(value, (_, val) => {
     if (typeof val !== "bigint")
@@ -27631,30 +27735,30 @@ function serializeDefaultValue(value, schema, ctx, json3, params) {
   });
   if (!unrepresentable)
     return JSON.parse(serialized);
-  handleUnrepresentable(schema, ctx, json3, params, "BigInt defaults cannot be represented in JSON Schema");
+  handleUnrepresentable(schema, ctx, json4, params, "BigInt defaults cannot be represented in JSON Schema");
   return UNREPRESENTABLE_DEFAULT;
 }
-var defaultProcessor = (schema, ctx, json3, params) => {
+var defaultProcessor = (schema, ctx, json4, params) => {
   const def = schema._zod.def;
   processSchema(def.innerType, ctx, params);
   const seen = ctx.seen.get(schema);
   seen.ref = def.innerType;
-  const value = serializeDefaultValue(def.defaultValue, schema, ctx, json3, params);
+  const value = serializeDefaultValue(def.defaultValue, schema, ctx, json4, params);
   if (value !== UNREPRESENTABLE_DEFAULT)
-    json3.default = value;
+    json4.default = value;
 };
-var prefaultProcessor = (schema, ctx, json3, params) => {
+var prefaultProcessor = (schema, ctx, json4, params) => {
   const def = schema._zod.def;
   processSchema(def.innerType, ctx, params);
   const seen = ctx.seen.get(schema);
   seen.ref = def.innerType;
   if (ctx.io !== "input")
     return;
-  const value = serializeDefaultValue(def.defaultValue, schema, ctx, json3, params);
+  const value = serializeDefaultValue(def.defaultValue, schema, ctx, json4, params);
   if (value !== UNREPRESENTABLE_DEFAULT)
-    json3._prefault = value;
+    json4._prefault = value;
 };
-var catchProcessor = (schema, ctx, json3, params) => {
+var catchProcessor = (schema, ctx, json4, params) => {
   const def = schema._zod.def;
   processSchema(def.innerType, ctx, params);
   const seen = ctx.seen.get(schema);
@@ -27663,10 +27767,10 @@ var catchProcessor = (schema, ctx, json3, params) => {
   try {
     catchValue = def.catchValue(void 0);
   } catch {
-    handleUnrepresentable(schema, ctx, json3, params, "Dynamic catch values are not supported in JSON Schema");
+    handleUnrepresentable(schema, ctx, json4, params, "Dynamic catch values are not supported in JSON Schema");
     return;
   }
-  json3.default = catchValue;
+  json4.default = catchValue;
 };
 var pipeProcessor = (schema, ctx, _json, params) => {
   const def = schema._zod.def;
@@ -27676,12 +27780,12 @@ var pipeProcessor = (schema, ctx, _json, params) => {
   const seen = ctx.seen.get(schema);
   seen.ref = innerType;
 };
-var readonlyProcessor = (schema, ctx, json3, params) => {
+var readonlyProcessor = (schema, ctx, json4, params) => {
   const def = schema._zod.def;
   processSchema(def.innerType, ctx, params);
   const seen = ctx.seen.get(schema);
   seen.ref = def.innerType;
-  json3.readOnly = true;
+  json4.readOnly = true;
 };
 var promiseProcessor = (schema, ctx, _json, params) => {
   const def = schema._zod.def;
@@ -28967,7 +29071,7 @@ var _ZodString = /* @__PURE__ */ $constructor(
   (inst, def) => {
     $ZodString.init(inst, def);
     ZodType2.init(inst, def);
-    inst._zod.processJSONSchema = (ctx, json3, params) => stringProcessor(inst, ctx, json3, params);
+    inst._zod.processJSONSchema = (ctx, json4, params) => stringProcessor(inst, ctx, json4, params);
   },
   /* @__PURE__ */ util_exports.derived({
     format: (inst) => aggregateChecks(inst).format ?? null,
@@ -29326,7 +29430,7 @@ var ZodNumber2 = /* @__PURE__ */ $constructor(
   (inst, def) => {
     $ZodNumber.init(inst, def);
     ZodType2.init(inst, def);
-    inst._zod.processJSONSchema = (ctx, json3, params) => numberProcessor(inst, ctx, json3, params);
+    inst._zod.processJSONSchema = (ctx, json4, params) => numberProcessor(inst, ctx, json4, params);
     inst.isFinite = true;
   },
   /* @__PURE__ */ util_exports.derived({
@@ -29416,7 +29520,7 @@ function uint32(params) {
 var ZodBoolean2 = /* @__PURE__ */ $constructor("ZodBoolean", (inst, def) => {
   $ZodBoolean.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => booleanProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => booleanProcessor(inst, ctx, json4, params);
 });
 function boolean2(params) {
   return _boolean(ZodBoolean2, params);
@@ -29426,7 +29530,7 @@ var ZodBigInt2 = /* @__PURE__ */ $constructor(
   (inst, def) => {
     $ZodBigInt.init(inst, def);
     ZodType2.init(inst, def);
-    inst._zod.processJSONSchema = (ctx, json3, params) => bigintProcessor(inst, ctx, json3, params);
+    inst._zod.processJSONSchema = (ctx, json4, params) => bigintProcessor(inst, ctx, json4, params);
   },
   /* @__PURE__ */ util_exports.derived({
     minValue: (inst) => aggregateChecks(inst).minimum ?? null,
@@ -29484,7 +29588,7 @@ function uint64(params) {
 var ZodSymbol2 = /* @__PURE__ */ $constructor("ZodSymbol", (inst, def) => {
   $ZodSymbol.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => symbolProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => symbolProcessor(inst, ctx, json4, params);
 });
 function symbol(params) {
   return _symbol(ZodSymbol2, params);
@@ -29492,7 +29596,7 @@ function symbol(params) {
 var ZodUndefined2 = /* @__PURE__ */ $constructor("ZodUndefined", (inst, def) => {
   $ZodUndefined.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => undefinedProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => undefinedProcessor(inst, ctx, json4, params);
 });
 function _undefined3(params) {
   return _undefined2(ZodUndefined2, params);
@@ -29500,7 +29604,7 @@ function _undefined3(params) {
 var ZodNull2 = /* @__PURE__ */ $constructor("ZodNull", (inst, def) => {
   $ZodNull.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => nullProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => nullProcessor(inst, ctx, json4, params);
 });
 function _null3(params) {
   return _null2(ZodNull2, params);
@@ -29508,7 +29612,7 @@ function _null3(params) {
 var ZodAny2 = /* @__PURE__ */ $constructor("ZodAny", (inst, def) => {
   $ZodAny.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => anyProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => anyProcessor(inst, ctx, json4, params);
 });
 function any() {
   return _any(ZodAny2);
@@ -29516,7 +29620,7 @@ function any() {
 var ZodUnknown2 = /* @__PURE__ */ $constructor("ZodUnknown", (inst, def) => {
   $ZodUnknown.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => unknownProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => unknownProcessor(inst, ctx, json4, params);
 });
 function unknown() {
   return _unknown(ZodUnknown2);
@@ -29524,7 +29628,7 @@ function unknown() {
 var ZodNever2 = /* @__PURE__ */ $constructor("ZodNever", (inst, def) => {
   $ZodNever.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => neverProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => neverProcessor(inst, ctx, json4, params);
 });
 function never(params) {
   return _never(ZodNever2, params);
@@ -29532,7 +29636,7 @@ function never(params) {
 var ZodVoid2 = /* @__PURE__ */ $constructor("ZodVoid", (inst, def) => {
   $ZodVoid.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => voidProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => voidProcessor(inst, ctx, json4, params);
 });
 function _void2(params) {
   return _void(ZodVoid2, params);
@@ -29542,7 +29646,7 @@ var ZodDate2 = /* @__PURE__ */ $constructor(
   (inst, def) => {
     $ZodDate.init(inst, def);
     ZodType2.init(inst, def);
-    inst._zod.processJSONSchema = (ctx, json3, params) => dateProcessor(inst, ctx, json3, params);
+    inst._zod.processJSONSchema = (ctx, json4, params) => dateProcessor(inst, ctx, json4, params);
     inst.min = (value, params) => inst.check(_gte(value, params));
     inst.max = (value, params) => inst.check(_lte(value, params));
   },
@@ -29564,7 +29668,7 @@ var ZodArray2 = /* @__PURE__ */ $constructor("ZodArray", (inst, def) => {
   _ensureDefaultMemoizer();
   $ZodArray.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => arrayProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => arrayProcessor(inst, ctx, json4, params);
   inst.element = def.element;
 }, {
   min(n, params) {
@@ -29594,7 +29698,7 @@ var ZodObject2 = /* @__PURE__ */ $constructor("ZodObject", (inst, def) => {
   _ensureDefaultMemoizer();
   $ZodObjectJIT.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => objectProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => objectProcessor(inst, ctx, json4, params);
   util_exports.installLazyProp(inst, "shape", (self) => self._zod.def.shape, false);
 }, {
   keyof() {
@@ -29667,7 +29771,7 @@ function looseObject(shape, params) {
 var ZodUnion2 = /* @__PURE__ */ $constructor("ZodUnion", (inst, def) => {
   $ZodUnion.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => unionProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => unionProcessor(inst, ctx, json4, params);
   inst.options = def.options;
 });
 function union(options, params) {
@@ -29680,7 +29784,7 @@ function union(options, params) {
 var ZodXor = /* @__PURE__ */ $constructor("ZodXor", (inst, def) => {
   ZodUnion2.init(inst, def);
   $ZodXor.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => unionProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => unionProcessor(inst, ctx, json4, params);
   inst.options = def.options;
 });
 function xor(options, params) {
@@ -29706,7 +29810,7 @@ function discriminatedUnion(discriminator, options, params) {
 var ZodIntersection2 = /* @__PURE__ */ $constructor("ZodIntersection", (inst, def) => {
   $ZodIntersection.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => intersectionProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => intersectionProcessor(inst, ctx, json4, params);
 });
 function intersection(left, right) {
   return new ZodIntersection2({
@@ -29719,7 +29823,7 @@ var ZodTuple2 = /* @__PURE__ */ $constructor("ZodTuple", (inst, def) => {
   _ensureDefaultMemoizer();
   $ZodTuple.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => tupleProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => tupleProcessor(inst, ctx, json4, params);
 }, {
   rest(rest) {
     return this.clone({
@@ -29752,7 +29856,7 @@ var ZodRecord2 = /* @__PURE__ */ $constructor("ZodRecord", (inst, def) => {
   _ensureDefaultMemoizer();
   $ZodRecord.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => recordProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => recordProcessor(inst, ctx, json4, params);
   inst.keyType = def.keyType;
   inst.valueType = def.valueType;
 });
@@ -29794,7 +29898,7 @@ var ZodMap2 = /* @__PURE__ */ $constructor("ZodMap", (inst, def) => {
   _ensureDefaultMemoizer();
   $ZodMap.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => mapProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => mapProcessor(inst, ctx, json4, params);
   inst.keyType = def.keyType;
   inst.valueType = def.valueType;
   inst.min = (...args) => inst.check(_minSize(...args));
@@ -29814,7 +29918,7 @@ var ZodSet2 = /* @__PURE__ */ $constructor("ZodSet", (inst, def) => {
   _ensureDefaultMemoizer();
   $ZodSet.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => setProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => setProcessor(inst, ctx, json4, params);
   inst.min = (...args) => inst.check(_minSize(...args));
   inst.nonempty = (params) => inst.check(_minSize(1, params));
   inst.max = (...args) => inst.check(_maxSize(...args));
@@ -29830,7 +29934,7 @@ function set(valueType, params) {
 var ZodEnum2 = /* @__PURE__ */ $constructor("ZodEnum", (inst, def) => {
   $ZodEnum.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => enumProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => enumProcessor(inst, ctx, json4, params);
   inst.enum = def.entries;
   inst.options = [...inst._zod.values];
   const keys = new Set(Object.keys(def.entries));
@@ -29883,7 +29987,7 @@ function nativeEnum(entries, params) {
 var ZodLiteral2 = /* @__PURE__ */ $constructor("ZodLiteral", (inst, def) => {
   $ZodLiteral.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => literalProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => literalProcessor(inst, ctx, json4, params);
   inst.values = new Set(def.values);
   Object.defineProperty(inst, "value", {
     get() {
@@ -29904,7 +30008,7 @@ function literal(value, params) {
 var ZodFile = /* @__PURE__ */ $constructor("ZodFile", (inst, def) => {
   $ZodFile.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => fileProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => fileProcessor(inst, ctx, json4, params);
   inst.min = (size, params) => inst.check(_minSize(size, params));
   inst.max = (size, params) => inst.check(_maxSize(size, params));
   inst.mime = (types, params) => inst.check(_mime(Array.isArray(types) ? types : [types], params));
@@ -29916,7 +30020,7 @@ var ZodTransform = /* @__PURE__ */ $constructor("ZodTransform", (inst, def) => {
   _ensureDefaultMemoizer();
   $ZodTransform.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => transformProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => transformProcessor(inst, ctx, json4, params);
   inst._zod.parse = (payload, _ctx) => {
     if (_ctx.direction === "backward") {
       throw new $ZodEncodeError(inst.constructor.name);
@@ -29955,7 +30059,7 @@ function transform(fn) {
 var ZodOptional2 = /* @__PURE__ */ $constructor("ZodOptional", (inst, def) => {
   $ZodOptional.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => optionalProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => optionalProcessor(inst, ctx, json4, params);
   inst.unwrap = () => inst._zod.def.innerType;
 });
 function optional(innerType) {
@@ -29967,7 +30071,7 @@ function optional(innerType) {
 var ZodExactOptional = /* @__PURE__ */ $constructor("ZodExactOptional", (inst, def) => {
   $ZodExactOptional.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => optionalProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => optionalProcessor(inst, ctx, json4, params);
   inst.unwrap = () => inst._zod.def.innerType;
 });
 function exactOptional(innerType) {
@@ -29979,7 +30083,7 @@ function exactOptional(innerType) {
 var ZodNullable2 = /* @__PURE__ */ $constructor("ZodNullable", (inst, def) => {
   $ZodNullable.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => nullableProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => nullableProcessor(inst, ctx, json4, params);
   inst.unwrap = () => inst._zod.def.innerType;
 });
 function nullable(innerType) {
@@ -29994,7 +30098,7 @@ function nullish2(innerType) {
 var ZodDefault2 = /* @__PURE__ */ $constructor("ZodDefault", (inst, def) => {
   $ZodDefault.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => defaultProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => defaultProcessor(inst, ctx, json4, params);
   inst.unwrap = () => inst._zod.def.innerType;
   inst.removeDefault = inst.unwrap;
 });
@@ -30010,7 +30114,7 @@ function _default2(innerType, defaultValue) {
 var ZodPrefault = /* @__PURE__ */ $constructor("ZodPrefault", (inst, def) => {
   $ZodPrefault.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => prefaultProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => prefaultProcessor(inst, ctx, json4, params);
   inst.unwrap = () => inst._zod.def.innerType;
 });
 function prefault(innerType, defaultValue) {
@@ -30025,7 +30129,7 @@ function prefault(innerType, defaultValue) {
 var ZodNonOptional = /* @__PURE__ */ $constructor("ZodNonOptional", (inst, def) => {
   $ZodNonOptional.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => nonoptionalProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => nonoptionalProcessor(inst, ctx, json4, params);
   inst.unwrap = () => inst._zod.def.innerType;
 });
 function nonoptional(innerType, params) {
@@ -30038,7 +30142,7 @@ function nonoptional(innerType, params) {
 var ZodSuccess = /* @__PURE__ */ $constructor("ZodSuccess", (inst, def) => {
   $ZodSuccess.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => successProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => successProcessor(inst, ctx, json4, params);
   inst.unwrap = () => inst._zod.def.innerType;
 });
 function success(innerType) {
@@ -30050,7 +30154,7 @@ function success(innerType) {
 var ZodCatch2 = /* @__PURE__ */ $constructor("ZodCatch", (inst, def) => {
   $ZodCatch.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => catchProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => catchProcessor(inst, ctx, json4, params);
   inst.unwrap = () => inst._zod.def.innerType;
   inst.removeCatch = inst.unwrap;
 });
@@ -30064,7 +30168,7 @@ function _catch2(innerType, catchValue) {
 var ZodNaN2 = /* @__PURE__ */ $constructor("ZodNaN", (inst, def) => {
   $ZodNaN.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => nanProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => nanProcessor(inst, ctx, json4, params);
 });
 function nan(params) {
   return _nan(ZodNaN2, params);
@@ -30072,7 +30176,7 @@ function nan(params) {
 var ZodPipe = /* @__PURE__ */ $constructor("ZodPipe", (inst, def) => {
   $ZodPipe.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => pipeProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => pipeProcessor(inst, ctx, json4, params);
   inst.in = def.in;
   inst.out = def.out;
 });
@@ -30114,7 +30218,7 @@ var ZodPreprocess = /* @__PURE__ */ $constructor("ZodPreprocess", (inst, def) =>
 var ZodReadonly2 = /* @__PURE__ */ $constructor("ZodReadonly", (inst, def) => {
   $ZodReadonly.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => readonlyProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => readonlyProcessor(inst, ctx, json4, params);
   inst.unwrap = () => inst._zod.def.innerType;
 });
 function readonly(innerType) {
@@ -30126,7 +30230,7 @@ function readonly(innerType) {
 var ZodTemplateLiteral = /* @__PURE__ */ $constructor("ZodTemplateLiteral", (inst, def) => {
   $ZodTemplateLiteral.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => templateLiteralProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => templateLiteralProcessor(inst, ctx, json4, params);
 });
 function templateLiteral(parts, params) {
   return new ZodTemplateLiteral({
@@ -30138,7 +30242,7 @@ function templateLiteral(parts, params) {
 var ZodLazy2 = /* @__PURE__ */ $constructor("ZodLazy", (inst, def) => {
   $ZodLazy.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => lazyProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => lazyProcessor(inst, ctx, json4, params);
   inst.unwrap = () => inst._zod.def.getter();
 });
 function lazy(getter) {
@@ -30150,7 +30254,7 @@ function lazy(getter) {
 var ZodPromise2 = /* @__PURE__ */ $constructor("ZodPromise", (inst, def) => {
   $ZodPromise.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => promiseProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => promiseProcessor(inst, ctx, json4, params);
   inst.unwrap = () => inst._zod.def.innerType;
 });
 function promise(innerType) {
@@ -30162,7 +30266,7 @@ function promise(innerType) {
 var ZodFunction2 = /* @__PURE__ */ $constructor("ZodFunction", (inst, def) => {
   $ZodFunction.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => functionProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => functionProcessor(inst, ctx, json4, params);
 });
 function _function(params) {
   return new ZodFunction2({
@@ -30174,7 +30278,7 @@ function _function(params) {
 var ZodCustom = /* @__PURE__ */ $constructor("ZodCustom", (inst, def) => {
   $ZodCustom.init(inst, def);
   ZodType2.init(inst, def);
-  inst._zod.processJSONSchema = (ctx, json3, params) => customProcessor(inst, ctx, json3, params);
+  inst._zod.processJSONSchema = (ctx, json4, params) => customProcessor(inst, ctx, json4, params);
 });
 function check(fn) {
   const ch = new $ZodCheck({
@@ -31096,6 +31200,7 @@ function date4(params) {
 
 // node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.1_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/types.js
 var LATEST_PROTOCOL_VERSION = "2025-11-25";
+var DEFAULT_NEGOTIATED_PROTOCOL_VERSION = "2025-03-26";
 var SUPPORTED_PROTOCOL_VERSIONS = [LATEST_PROTOCOL_VERSION, "2025-06-18", "2025-03-26", "2024-11-05", "2024-10-07"];
 var RELATED_TASK_META_KEY = "io.modelcontextprotocol/related-task";
 var JSONRPC_VERSION = "2.0";
@@ -31424,6 +31529,7 @@ var InitializeRequestSchema = RequestSchema.extend({
   method: literal("initialize"),
   params: InitializeRequestParamsSchema
 });
+var isInitializeRequest = (value) => InitializeRequestSchema.safeParse(value).success;
 var ServerCapabilitiesSchema = object2({
   /**
    * Experimental, non-standard capabilities that the server supports.
@@ -36882,8 +36988,8 @@ var StdioServerTransport = class {
   }
   send(message) {
     return new Promise((resolve3) => {
-      const json3 = serializeMessage(message);
-      if (this._stdout.write(json3)) {
+      const json4 = serializeMessage(message);
+      if (this._stdout.write(json4)) {
         resolve3();
       } else {
         this._stdout.once("drain", resolve3);
@@ -37870,26 +37976,26 @@ var PhotosManager = class {
   }
   async run(command, args, timeoutMs, library, onProgress) {
     const cacheable = CACHEABLE_COMMANDS.has(command);
-    let cacheKey = null;
+    let cacheKey2 = null;
     let mtimeMs = null;
     if (cacheable) {
       mtimeMs = this.dbMtimeMs(library);
       if (mtimeMs !== null) {
-        cacheKey = `${command} ${JSON.stringify(args)} ${libraryDbFile(library)}`;
-        const hit = this.cache.get(cacheKey);
+        cacheKey2 = `${command} ${JSON.stringify(args)} ${libraryDbFile(library)}`;
+        const hit = this.cache.get(cacheKey2);
         if (hit && hit.mtimeMs === mtimeMs) {
           return hit.data;
         }
-        if (hit) this.cache.delete(cacheKey);
-        const pending = this.inFlight.get(cacheKey);
+        if (hit) this.cache.delete(cacheKey2);
+        const pending = this.inFlight.get(cacheKey2);
         if (pending && pending.mtimeMs === mtimeMs) {
           return pending.promise;
         }
       }
     }
-    const promise2 = this.spawnAndCache(command, args, timeoutMs, cacheKey, mtimeMs, onProgress);
-    if (cacheKey !== null && mtimeMs !== null) {
-      const key = cacheKey;
+    const promise2 = this.spawnAndCache(command, args, timeoutMs, cacheKey2, mtimeMs, onProgress);
+    if (cacheKey2 !== null && mtimeMs !== null) {
+      const key = cacheKey2;
       const entry = { mtimeMs, promise: promise2 };
       this.inFlight.set(key, entry);
       const cleanup = () => {
@@ -37899,7 +38005,7 @@ var PhotosManager = class {
     }
     return promise2;
   }
-  async spawnAndCache(command, args, timeoutMs, cacheKey, mtimeMs, onProgress) {
+  async spawnAndCache(command, args, timeoutMs, cacheKey2, mtimeMs, onProgress) {
     const result = await runPhotosReader(command, args, timeoutMs, onProgress);
     if (result.error) {
       throw new Error(augmentPermissionError(result.error));
@@ -37907,8 +38013,8 @@ var PhotosManager = class {
     if (!result.data) {
       throw new Error("Python script returned no data");
     }
-    if (cacheKey !== null && mtimeMs !== null) {
-      this.cache.set(cacheKey, { mtimeMs, data: result.data });
+    if (cacheKey2 !== null && mtimeMs !== null) {
+      this.cache.set(cacheKey2, { mtimeMs, data: result.data });
       while (this.cache.size > MAX_CACHE_ENTRIES) {
         const oldest = this.cache.keys().next().value;
         if (oldest === void 0) break;
@@ -38351,9 +38457,9 @@ function preserveObjectSchemaContracts(schema) {
   }
   visit2(schema);
 }
-function registerToolWithContracts(server2, name, config2, cb) {
+function registerToolWithContracts(server, name, config2, cb) {
   const { outputSchema, ...rest } = config2;
-  const tool = server2.registerTool(
+  const tool = server.registerTool(
     name,
     outputSchema ? { ...rest, outputSchema: external_exports.object(outputSchema).passthrough() } : rest,
     cb
@@ -38561,36 +38667,36 @@ function formatDoctorReport(r) {
 var json2 = (uri, data) => ({
   contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(data, null, 2) }]
 });
-function registerResourcesAndPrompts(server2, manager2) {
-  server2.resource("library", "photos://library", async (uri) => {
+function registerResourcesAndPrompts(server, manager2) {
+  server.resource("library", "photos://library", async (uri) => {
     try {
       return json2(uri, await manager2.getLibraryInfo());
     } catch (err) {
       return json2(uri, { error: err instanceof Error ? err.message : String(err) });
     }
   });
-  server2.resource("albums", "photos://albums", async (uri) => {
+  server.resource("albums", "photos://albums", async (uri) => {
     try {
       return json2(uri, await manager2.listAlbums());
     } catch (err) {
       return json2(uri, { error: err instanceof Error ? err.message : String(err) });
     }
   });
-  server2.resource("persons", "photos://persons", async (uri) => {
+  server.resource("persons", "photos://persons", async (uri) => {
     try {
       return json2(uri, await manager2.listPersons());
     } catch (err) {
       return json2(uri, { error: err instanceof Error ? err.message : String(err) });
     }
   });
-  server2.resource("keywords", "photos://keywords", async (uri) => {
+  server.resource("keywords", "photos://keywords", async (uri) => {
     try {
       return json2(uri, await manager2.listKeywords());
     } catch (err) {
       return json2(uri, { error: err instanceof Error ? err.message : String(err) });
     }
   });
-  server2.resource(
+  server.resource(
     "photo",
     new ResourceTemplate("photos://photo/{uuid}", { list: void 0 }),
     async (uri, variables) => {
@@ -38602,7 +38708,7 @@ function registerResourcesAndPrompts(server2, manager2) {
       }
     }
   );
-  server2.prompt(
+  server.prompt(
     "find-photos",
     "Find photos matching criteria and summarize them",
     { criteria: external_exports.string().describe("What photos to look for (people, dates, keywords, etc.)") },
@@ -38618,7 +38724,7 @@ function registerResourcesAndPrompts(server2, manager2) {
       ]
     })
   );
-  server2.prompt(
+  server.prompt(
     "export-photos",
     "Find photos matching criteria and export them to a destination",
     {
@@ -38637,7 +38743,7 @@ function registerResourcesAndPrompts(server2, manager2) {
       ]
     })
   );
-  server2.prompt("photo-summary", "Summarize the contents of the photo library", () => ({
+  server.prompt("photo-summary", "Summarize the contents of the photo library", () => ({
     messages: [
       {
         role: "user",
@@ -38678,88 +38784,2389 @@ function loadFileConfig(env = process.env, path = fileConfigPath(env)) {
   return applied;
 }
 
+// src/http.ts
+import {
+  createServer as createHttpServer
+} from "node:http";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
+import { execFileSync } from "node:child_process";
+
+// node_modules/.pnpm/@hono+node-server@2.1.5_hono@4.13.13/node_modules/@hono/node-server/dist/constants-BLSFu_RU.mjs
+var X_ALREADY_SENT = "x-hono-already-sent";
+
+// node_modules/.pnpm/@hono+node-server@2.1.5_hono@4.13.13/node_modules/@hono/node-server/dist/index.mjs
+import { STATUS_CODES, ServerResponse, createServer } from "node:http";
+import { Http2ServerRequest, constants } from "node:http2";
+import { Readable } from "node:stream";
+
+// node_modules/.pnpm/hono@4.13.13/node_modules/hono/dist/helper/websocket/index.js
+var defineWebSocketHelper = (handler) => {
+  return ((...args) => {
+    if (typeof args[0] === "function") {
+      const [createEvents, options] = args;
+      return async function upgradeWebSocket2(c, next) {
+        const result = await handler(c, await createEvents(c), options);
+        if (result) return result;
+        await next();
+      };
+    } else {
+      const [c, events, options] = args;
+      return (async () => {
+        const upgraded = await handler(c, events, options);
+        if (!upgraded) throw new Error("Failed to upgrade WebSocket");
+        return upgraded;
+      })();
+    }
+  });
+};
+
+// node_modules/.pnpm/@hono+node-server@2.1.5_hono@4.13.13/node_modules/@hono/node-server/dist/index.mjs
+var RequestError = class extends Error {
+  constructor(message, options) {
+    super(message, options);
+    this.name = "RequestError";
+  }
+};
+var nonJoinedHeaders = /* @__PURE__ */ new Set([
+  "age",
+  "authorization",
+  "content-length",
+  "content-type",
+  "etag",
+  "expires",
+  "from",
+  "host",
+  "if-modified-since",
+  "if-unmodified-since",
+  "last-modified",
+  "location",
+  "max-forwards",
+  "proxy-authorization",
+  "referer",
+  "retry-after",
+  "server",
+  "user-agent"
+]);
+var validHeaderName = /^[!#$%&'*+\-.^_`|~\dA-Za-z]+$/;
+var isHttpWhitespace = (code) => code === 9 || code === 10 || code === 13 || code === 32;
+var normalizeHeaderValue = (value) => {
+  if (!isHttpWhitespace(value.charCodeAt(0)) && !isHttpWhitespace(value.charCodeAt(value.length - 1))) return value;
+  let start = 0;
+  let end = value.length;
+  while (start < end && isHttpWhitespace(value.charCodeAt(start))) start++;
+  while (end > start && isHttpWhitespace(value.charCodeAt(end - 1))) end--;
+  return value.slice(start, end);
+};
+var forbiddenHeaderValue = /[\0\r\n]/;
+var GlobalHeaders = globalThis.Headers;
+var materializeHeaders = (rawHeaders, HeadersCtor = GlobalHeaders) => {
+  const headers = new HeadersCtor();
+  for (let i = 0; i < rawHeaders.length; i += 2) {
+    const name = rawHeaders[i];
+    if (!name.startsWith(":")) headers.append(name, rawHeaders[i + 1]);
+  }
+  return headers;
+};
+var RequestHeaders = class {
+  #incoming;
+  #rawHeaders;
+  #headers;
+  #invalidValue;
+  constructor(incoming) {
+    this.#incoming = incoming;
+    if (incoming instanceof Http2ServerRequest) this.#rawHeaders = incoming.rawHeaders.slice();
+  }
+  get #lazyRawHeaders() {
+    return this.#rawHeaders ??= this.#incoming.rawHeaders.slice();
+  }
+  get #native() {
+    if (!this.#headers) {
+      this.#headers = materializeHeaders(this.#lazyRawHeaders);
+      this.#rawHeaders = void 0;
+    }
+    return this.#headers;
+  }
+  #normalizedName(name) {
+    if (typeof name !== "string") return;
+    if (!validHeaderName.test(name)) throw new TypeError(`Invalid header name: ${name}`);
+    return name.toLowerCase();
+  }
+  #lookupHttp1(lowerName) {
+    const headers = this.#incoming instanceof Http2ServerRequest ? void 0 : this.#incoming.headers;
+    if (!headers || nonJoinedHeaders.has(lowerName) || lowerName === "set-cookie" || lowerName === "__proto__") return;
+    if (!Object.hasOwn(headers, lowerName)) return null;
+    const rawValue = headers[lowerName];
+    if (typeof rawValue === "string") {
+      const value = normalizeHeaderValue(rawValue);
+      return forbiddenHeaderValue.test(value) ? void 0 : value;
+    }
+  }
+  #lookup(rawHeaders, lowerName) {
+    const separator = lowerName === "cookie" ? "; " : ", ";
+    let value = null;
+    for (let i = 0; i < rawHeaders.length; i += 2) {
+      const rawName = rawHeaders[i];
+      if (rawName.length === lowerName.length && rawName.toLowerCase() === lowerName) {
+        const rawValue = normalizeHeaderValue(rawHeaders[i + 1]);
+        if (forbiddenHeaderValue.test(rawValue)) {
+          this.#invalidValue = true;
+          return;
+        }
+        value = value === null ? rawValue : value + separator + rawValue;
+      }
+    }
+    return value;
+  }
+  append(name, value) {
+    this.#native.append(name, value);
+  }
+  delete(name) {
+    this.#native.delete(name);
+  }
+  get(name) {
+    const lowerName = this.#normalizedName(name);
+    if (lowerName && !this.#headers && !this.#invalidValue) {
+      const http1Value = this.#lookupHttp1(lowerName);
+      if (http1Value !== void 0) return http1Value;
+      const value = this.#lookup(this.#lazyRawHeaders, lowerName);
+      if (value !== void 0) return value;
+    }
+    return this.#native.get(name);
+  }
+  has(name) {
+    const lowerName = this.#normalizedName(name);
+    if (lowerName && !this.#headers && !this.#invalidValue) {
+      const http1Value = this.#lookupHttp1(lowerName);
+      if (http1Value !== void 0) return http1Value !== null;
+      const value = this.#lookup(this.#lazyRawHeaders, lowerName);
+      if (value !== void 0) return value !== null;
+    }
+    return this.#native.has(name);
+  }
+  set(name, value) {
+    this.#native.set(name, value);
+  }
+  getSetCookie() {
+    return this.#native.getSetCookie();
+  }
+  keys() {
+    return this.#native.keys();
+  }
+  values() {
+    return this.#native.values();
+  }
+  entries() {
+    return this.#native.entries();
+  }
+  forEach(callback, thisArg) {
+    this.#native.forEach((value, key) => {
+      callback.call(thisArg, value, key, this);
+    });
+  }
+  [Symbol.iterator]() {
+    return this.entries();
+  }
+};
+Object.defineProperty(RequestHeaders.prototype, /* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom"), { value: function(depth, options, inspectFn) {
+  return `Headers (lightweight) ${inspectFn(Object.fromEntries(this), {
+    ...options,
+    depth: depth == null ? null : depth - 1
+  })}`;
+} });
+Object.setPrototypeOf(RequestHeaders.prototype, GlobalHeaders.prototype);
+var newHeadersFromIncoming = (incoming) => globalThis.Headers === GlobalHeaders ? new RequestHeaders(incoming) : materializeHeaders(incoming.rawHeaders, globalThis.Headers);
+var reValidRequestUrl = /^\/[!#$&-;=?-\[\]_a-z~]*$/;
+var reDotSegment = /\/\.\.?(?:[/?#]|$)/;
+var reValidHost = /^[a-z0-9._-]+(?::(?:[1-5]\d{3,4}|[6-9]\d{3}))?$/;
+var buildUrl = (scheme, host, incomingUrl) => {
+  const url2 = `${scheme}://${host}${incomingUrl}`;
+  if (!reValidHost.test(host)) {
+    const urlObj = new URL(url2);
+    if (urlObj.hostname.length !== host.length && urlObj.hostname !== (host.includes(":") ? host.replace(/:\d+$/, "") : host).toLowerCase()) throw new RequestError("Invalid host header");
+    return urlObj.href;
+  } else if (incomingUrl.length === 0) return url2 + "/";
+  else {
+    if (incomingUrl.charCodeAt(0) !== 47) throw new RequestError("Invalid URL");
+    if (!reValidRequestUrl.test(incomingUrl) || reDotSegment.test(incomingUrl)) return new URL(url2).href;
+    return url2;
+  }
+};
+var toRequestError = (e) => {
+  if (e instanceof RequestError) return e;
+  return new RequestError(e.message, { cause: e });
+};
+var GlobalRequest = global.Request;
+var Request$1 = class extends GlobalRequest {
+  constructor(input2, options) {
+    if (typeof input2 === "object" && getRequestCache in input2) {
+      const hasReplacementBody = options !== void 0 && "body" in options && options.body != null;
+      if (input2[bodyConsumedDirectlyKey] && !hasReplacementBody) throw new TypeError("Cannot construct a Request with a Request object that has already been used.");
+      input2 = input2[getRequestCache]();
+    }
+    if (typeof options?.body?.getReader !== "undefined") options.duplex ??= "half";
+    super(input2, options);
+  }
+};
+var wrapBodyStream = /* @__PURE__ */ Symbol("wrapBodyStream");
+var byteExactEncodings = /* @__PURE__ */ new Set([
+  "latin1",
+  "binary",
+  "hex",
+  "base64",
+  "base64url"
+]);
+var isByteExactEncoding = (encoding) => encoding === null || byteExactEncodings.has(encoding);
+var bodyBufferedBeforeDisconnectKey = /* @__PURE__ */ Symbol("bodyBufferedBeforeDisconnect");
+var bodyBufferedLengthBeforeDisconnectKey = /* @__PURE__ */ Symbol("bodyBufferedLengthBeforeDisconnect");
+var toBufferChunk = (chunk, encoding) => Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding ?? "utf8");
+var isRecoverableDisconnectedIncoming = (incoming) => !(incoming instanceof Http2ServerRequest) && !!incoming.complete && !!incoming.readableAborted && typeof incoming.read === "function" && isByteExactEncoding(incoming.readableEncoding);
+var recordBodyBufferedBeforeDisconnect = (incoming) => {
+  if (incoming.readableDidRead || !isRecoverableDisconnectedIncoming(incoming)) return;
+  const incomingWithRecovery = incoming;
+  incomingWithRecovery[bodyBufferedLengthBeforeDisconnectKey] ??= incoming.readableLength;
+};
+var readBodyBufferedBeforeDisconnect = (incoming, chunks) => {
+  if (incoming.readableDidRead && !chunks || !isRecoverableDisconnectedIncoming(incoming)) return;
+  const incomingWithRecovery = incoming;
+  if (incomingWithRecovery[bodyBufferedBeforeDisconnectKey] !== void 0) return incomingWithRecovery[bodyBufferedBeforeDisconnectKey];
+  let result;
+  const errored = incoming.errored;
+  if (errored && errored.code !== "ECONNRESET") result = errored;
+  else if (incomingWithRecovery[bodyBufferedLengthBeforeDisconnectKey] !== void 0 && incoming.readableLength !== incomingWithRecovery[bodyBufferedLengthBeforeDisconnectKey]) result = newBodyUnusableError();
+  else {
+    const bodyChunks = chunks ?? [];
+    const chunk = incoming.read();
+    if (chunk !== null) bodyChunks.push(toBufferChunk(chunk, incoming.readableEncoding));
+    const buffer = bodyChunks.length === 1 ? bodyChunks[0] : Buffer.concat(bodyChunks);
+    result = buffer;
+    const contentLength = incoming.headers["content-length"];
+    if (typeof contentLength === "string" && /^\d+$/.test(contentLength)) {
+      const expectedLength = Number(contentLength);
+      if (Number.isSafeInteger(expectedLength) && buffer.length !== expectedLength) result = newBodyUnusableError();
+    }
+  }
+  incomingWithRecovery[bodyBufferedBeforeDisconnectKey] = result;
+  return result;
+};
+var enqueueBufferedBody = (controller, buffered) => {
+  if (buffered instanceof Error) {
+    controller.error(buffered);
+    return;
+  }
+  if (buffered.length > 0) controller.enqueue(buffered);
+  controller.close();
+};
+var newRequestFromIncoming = (method, url2, headers, incoming, abortController) => {
+  const init = {
+    method,
+    headers,
+    signal: abortController.signal
+  };
+  if (method === "TRACE") {
+    init.method = "GET";
+    const req = new Request$1(url2, init);
+    Object.defineProperty(req, "method", { get() {
+      return "TRACE";
+    } });
+    return req;
+  }
+  if (!(method === "GET" || method === "HEAD")) if ("rawBody" in incoming && incoming.rawBody instanceof Buffer) init.body = new ReadableStream({ start(controller) {
+    controller.enqueue(incoming.rawBody);
+    controller.close();
+  } });
+  else if (incoming[wrapBodyStream]) {
+    let reader;
+    init.body = new ReadableStream({ async pull(controller) {
+      try {
+        if (!reader) {
+          const buffered = readBodyBufferedBeforeDisconnect(incoming);
+          if (buffered !== void 0) {
+            enqueueBufferedBody(controller, buffered);
+            return;
+          }
+        }
+        reader ||= Readable.toWeb(incoming).getReader();
+        const { done, value } = await reader.read();
+        if (done) controller.close();
+        else controller.enqueue(value);
+      } catch (error62) {
+        controller.error(error62);
+      }
+    } });
+  } else {
+    const buffered = readBodyBufferedBeforeDisconnect(incoming);
+    if (buffered !== void 0) init.body = new ReadableStream({ start(controller) {
+      enqueueBufferedBody(controller, buffered);
+    } });
+    else init.body = Readable.toWeb(incoming);
+  }
+  return new Request$1(url2, init);
+};
+var getRequestCache = /* @__PURE__ */ Symbol("getRequestCache");
+var requestCache = /* @__PURE__ */ Symbol("requestCache");
+var incomingKey = /* @__PURE__ */ Symbol("incomingKey");
+var urlKey = /* @__PURE__ */ Symbol("urlKey");
+var methodKey = /* @__PURE__ */ Symbol("methodKey");
+var headersKey = /* @__PURE__ */ Symbol("headersKey");
+var abortControllerKey = /* @__PURE__ */ Symbol("abortControllerKey");
+var getAbortController = /* @__PURE__ */ Symbol("getAbortController");
+var abortRequest = /* @__PURE__ */ Symbol("abortRequest");
+var bodyBufferKey = /* @__PURE__ */ Symbol("bodyBuffer");
+var bodyReadPromiseKey = /* @__PURE__ */ Symbol("bodyReadPromise");
+var bodyConsumedDirectlyKey = /* @__PURE__ */ Symbol("bodyConsumedDirectly");
+var bodyLockReaderKey = /* @__PURE__ */ Symbol("bodyLockReader");
+var abortReasonKey = /* @__PURE__ */ Symbol("abortReason");
+var newBodyUnusableError = () => {
+  return /* @__PURE__ */ new TypeError("Body is unusable");
+};
+var rejectBodyUnusable = () => {
+  return Promise.reject(newBodyUnusableError());
+};
+var textDecoder = new TextDecoder();
+var consumeBodyDirectOnce = (request) => {
+  if (request[bodyConsumedDirectlyKey]) return rejectBodyUnusable();
+  request[bodyConsumedDirectlyKey] = true;
+};
+var toArrayBuffer = (buf) => {
+  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+};
+var contentType = (request) => {
+  return (request[headersKey] ||= newHeadersFromIncoming(request[incomingKey])).get("content-type") || "";
+};
+var methodTokenRegExp = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
+var normalizeIncomingMethod = (method) => {
+  if (typeof method !== "string" || method.length === 0) return "GET";
+  switch (method) {
+    case "DELETE":
+    case "GET":
+    case "HEAD":
+    case "OPTIONS":
+    case "PATCH":
+    case "POST":
+    case "PUT":
+    case "QUERY":
+      return method;
+  }
+  const upper = method.toUpperCase();
+  switch (upper) {
+    case "DELETE":
+    case "GET":
+    case "HEAD":
+    case "OPTIONS":
+    case "POST":
+    case "PUT":
+      return upper;
+    default:
+      return method;
+  }
+};
+var validateDirectReadMethod = (method) => {
+  if (!methodTokenRegExp.test(method)) return /* @__PURE__ */ new TypeError(`'${method}' is not a valid HTTP method.`);
+  const normalized = method.toUpperCase();
+  if (normalized === "CONNECT" || normalized === "TRACK" || normalized === "TRACE" && method !== "TRACE") return /* @__PURE__ */ new TypeError(`'${method}' HTTP method is unsupported.`);
+};
+var readBodyWithFastPath = (request, method, fromBuffer) => {
+  if (request[bodyConsumedDirectlyKey]) return rejectBodyUnusable();
+  const methodName = request.method;
+  if (methodName === "GET" || methodName === "HEAD") return request[getRequestCache]()[method]();
+  const methodValidationError = validateDirectReadMethod(methodName);
+  if (methodValidationError) return Promise.reject(methodValidationError);
+  if (request[requestCache]) {
+    if (methodName !== "TRACE") return request[requestCache][method]();
+  }
+  const alreadyUsedError = consumeBodyDirectOnce(request);
+  if (alreadyUsedError) return alreadyUsedError;
+  const raw = readRawBodyIfAvailable(request);
+  if (raw) {
+    const result = Promise.resolve(fromBuffer(raw, request));
+    request[bodyBufferKey] = void 0;
+    return result;
+  }
+  return readBodyDirect(request).then((buf) => {
+    const result = fromBuffer(buf, request);
+    request[bodyBufferKey] = void 0;
+    return result;
+  });
+};
+var readRawBodyIfAvailable = (request) => {
+  const incoming = request[incomingKey];
+  if ("rawBody" in incoming && incoming.rawBody instanceof Buffer) return incoming.rawBody;
+};
+var normalizeAbortError = (request, incoming) => {
+  if (incoming.errored) return incoming.errored;
+  const reason = request[abortReasonKey];
+  if (reason !== void 0) return reason instanceof Error ? reason : new Error(String(reason));
+  return /* @__PURE__ */ new Error("Client connection prematurely closed.");
+};
+var readBodyDirect = (request) => {
+  if (request[bodyBufferKey]) return Promise.resolve(request[bodyBufferKey]);
+  if (request[bodyReadPromiseKey]) return request[bodyReadPromiseKey];
+  const incoming = request[incomingKey];
+  if (incoming.readableDidRead) return rejectBodyUnusable();
+  const buffered = readBodyBufferedBeforeDisconnect(incoming);
+  if (buffered !== void 0) {
+    if (buffered instanceof Error) return Promise.reject(buffered);
+    request[bodyBufferKey] = buffered;
+    return Promise.resolve(buffered);
+  }
+  const promise2 = new Promise((resolve3, reject) => {
+    const chunks = [];
+    let settled = false;
+    const finish = (callback) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      callback();
+    };
+    const recoverCompleteBodyAfterDisconnect = (error62) => {
+      const streamError = incoming.errored ?? error62;
+      if (!isRecoverableDisconnectedIncoming(incoming) || streamError && streamError.code !== "ECONNRESET") return false;
+      finish(() => {
+        const recovered = readBodyBufferedBeforeDisconnect(incoming, chunks);
+        if (recovered instanceof Error) reject(recovered);
+        else if (recovered === void 0) reject(error62 ?? normalizeAbortError(request, incoming));
+        else {
+          request[bodyBufferKey] = recovered;
+          resolve3(recovered);
+        }
+      });
+      return true;
+    };
+    const onData = (chunk) => {
+      chunks.push(toBufferChunk(chunk, incoming.readableEncoding));
+    };
+    const onEnd = () => {
+      finish(() => {
+        const buffer = chunks.length === 1 ? chunks[0] : Buffer.concat(chunks);
+        request[bodyBufferKey] = buffer;
+        resolve3(buffer);
+      });
+    };
+    const onError = (error62) => {
+      if (recoverCompleteBodyAfterDisconnect(error62)) return;
+      finish(() => {
+        reject(error62);
+      });
+    };
+    const onClose = () => {
+      if (incoming.readableEnded) {
+        onEnd();
+        return;
+      }
+      if (recoverCompleteBodyAfterDisconnect()) return;
+      finish(() => {
+        reject(normalizeAbortError(request, incoming));
+      });
+    };
+    const cleanup = () => {
+      incoming.off("data", onData);
+      incoming.off("end", onEnd);
+      incoming.off("error", onError);
+      incoming.off("close", onClose);
+      request[bodyReadPromiseKey] = void 0;
+    };
+    incoming.on("data", onData);
+    incoming.on("end", onEnd);
+    incoming.on("error", onError);
+    incoming.on("close", onClose);
+    queueMicrotask(() => {
+      if (settled) return;
+      if (incoming.readableEnded) onEnd();
+      else if (incoming.errored) onError(incoming.errored);
+      else if (incoming.destroyed) onClose();
+    });
+  });
+  request[bodyReadPromiseKey] = promise2;
+  return promise2;
+};
+var requestPrototype = {
+  get method() {
+    return this[methodKey];
+  },
+  get url() {
+    return this[urlKey];
+  },
+  get headers() {
+    return this[headersKey] ||= newHeadersFromIncoming(this[incomingKey]);
+  },
+  [abortRequest](reason) {
+    if (this[abortReasonKey] === void 0) this[abortReasonKey] = reason;
+    const abortController = this[abortControllerKey];
+    if (abortController && !abortController.signal.aborted) abortController.abort(reason);
+  },
+  [getAbortController]() {
+    this[abortControllerKey] ||= new AbortController();
+    if (this[abortReasonKey] !== void 0 && !this[abortControllerKey].signal.aborted) this[abortControllerKey].abort(this[abortReasonKey]);
+    return this[abortControllerKey];
+  },
+  [getRequestCache]() {
+    const abortController = this[getAbortController]();
+    if (this[requestCache]) return this[requestCache];
+    const method = this.method;
+    if (this[bodyConsumedDirectlyKey] && !(method === "GET" || method === "HEAD")) {
+      this[bodyBufferKey] = void 0;
+      const init = {
+        method: method === "TRACE" ? "GET" : method,
+        headers: this.headers,
+        signal: abortController.signal
+      };
+      if (method !== "TRACE") {
+        init.body = new ReadableStream({ start(c) {
+          c.close();
+        } });
+        init.duplex = "half";
+      }
+      const req = new Request$1(this[urlKey], init);
+      if (method === "TRACE") Object.defineProperty(req, "method", { get() {
+        return "TRACE";
+      } });
+      return this[requestCache] = req;
+    }
+    return this[requestCache] = newRequestFromIncoming(this.method, this[urlKey], this.headers, this[incomingKey], abortController);
+  },
+  get body() {
+    if (!this[bodyConsumedDirectlyKey]) return this[getRequestCache]().body;
+    const request = this[getRequestCache]();
+    if (!this[bodyLockReaderKey] && request.body) this[bodyLockReaderKey] = request.body.getReader();
+    return request.body;
+  },
+  get bodyUsed() {
+    if (this[bodyConsumedDirectlyKey]) return true;
+    if (this[requestCache]) return this[requestCache].bodyUsed;
+    return false;
+  }
+};
+Object.defineProperty(requestPrototype, "signal", { get() {
+  return this[getAbortController]().signal;
+} });
+[
+  "cache",
+  "credentials",
+  "destination",
+  "integrity",
+  "mode",
+  "redirect",
+  "referrer",
+  "referrerPolicy",
+  "keepalive"
+].forEach((k) => {
+  Object.defineProperty(requestPrototype, k, { get() {
+    return this[getRequestCache]()[k];
+  } });
+});
+["clone", "formData"].forEach((k) => {
+  Object.defineProperty(requestPrototype, k, { value: function() {
+    if (this[bodyConsumedDirectlyKey]) {
+      if (k === "clone") throw newBodyUnusableError();
+      return rejectBodyUnusable();
+    }
+    return this[getRequestCache]()[k]();
+  } });
+});
+Object.defineProperty(requestPrototype, "text", { value: function() {
+  return readBodyWithFastPath(this, "text", (buf) => textDecoder.decode(buf));
+} });
+Object.defineProperty(requestPrototype, "arrayBuffer", { value: function() {
+  return readBodyWithFastPath(this, "arrayBuffer", (buf) => toArrayBuffer(buf));
+} });
+Object.defineProperty(requestPrototype, "blob", { value: function() {
+  return readBodyWithFastPath(this, "blob", (buf, request) => {
+    const type = contentType(request);
+    const init = type ? { headers: { "content-type": type } } : void 0;
+    return new Response(buf, init).blob();
+  });
+} });
+Object.defineProperty(requestPrototype, "json", { value: function() {
+  if (this[bodyConsumedDirectlyKey]) return rejectBodyUnusable();
+  return this.text().then(JSON.parse);
+} });
+Object.defineProperty(requestPrototype, /* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom"), { value: function(depth, options, inspectFn) {
+  return `Request (lightweight) ${inspectFn({
+    method: this.method,
+    url: this.url,
+    headers: this.headers,
+    nativeRequest: this[requestCache]
+  }, {
+    ...options,
+    depth: depth == null ? null : depth - 1
+  })}`;
+} });
+Object.setPrototypeOf(requestPrototype, Request$1.prototype);
+var newRequest = (incoming, defaultHostname) => {
+  const req = Object.create(requestPrototype);
+  req[incomingKey] = incoming;
+  req[methodKey] = normalizeIncomingMethod(incoming.method);
+  const incomingUrl = incoming.url || "";
+  if (incomingUrl[0] !== "/" && (incomingUrl.startsWith("http://") || incomingUrl.startsWith("https://"))) {
+    if (incoming instanceof Http2ServerRequest) throw new RequestError("Absolute URL for :path is not allowed in HTTP/2");
+    try {
+      req[urlKey] = new URL(incomingUrl).href;
+    } catch (e) {
+      throw new RequestError("Invalid absolute URL", { cause: e });
+    }
+    return req;
+  }
+  const host = (incoming instanceof Http2ServerRequest ? incoming.authority : incoming.headers.host) || defaultHostname;
+  if (!host) throw new RequestError("Missing host header");
+  let scheme;
+  if (incoming instanceof Http2ServerRequest) {
+    scheme = incoming.scheme;
+    if (!(scheme === "http" || scheme === "https")) throw new RequestError("Unsupported scheme");
+  } else scheme = incoming.socket && incoming.socket.encrypted ? "https" : "http";
+  try {
+    req[urlKey] = buildUrl(scheme, host, incomingUrl);
+  } catch (e) {
+    if (e instanceof RequestError) throw e;
+    else throw new RequestError("Invalid URL", { cause: e });
+  }
+  return req;
+};
+var defaultContentType = "text/plain; charset=UTF-8";
+var responseCache = /* @__PURE__ */ Symbol("responseCache");
+var getResponseCache = /* @__PURE__ */ Symbol("getResponseCache");
+var cacheKey = /* @__PURE__ */ Symbol("cache");
+var GlobalResponse = global.Response;
+var Response$1 = class Response$12 {
+  #body;
+  #init;
+  [getResponseCache]() {
+    const cache = this[cacheKey];
+    const liveHeaders = cache && cache[2] instanceof Headers ? cache[2] : void 0;
+    delete this[cacheKey];
+    return this[responseCache] ||= new GlobalResponse(this.#body, liveHeaders ? {
+      status: this.#init?.status,
+      statusText: this.#init?.statusText,
+      headers: liveHeaders
+    } : this.#init);
+  }
+  constructor(body, init) {
+    let headers;
+    this.#body = body;
+    if (init instanceof GlobalResponse) {
+      const cachedGlobalResponse = init[responseCache];
+      if (cachedGlobalResponse) {
+        this.#init = cachedGlobalResponse;
+        this[getResponseCache]();
+        return;
+      }
+      this.#init = init instanceof Response$12 ? init.#init : init;
+      headers = new Headers(init.headers);
+    } else this.#init = init;
+    if (body == null || typeof body === "string" || typeof body?.getReader !== "undefined" || body instanceof Blob || body instanceof Uint8Array) this[cacheKey] = [
+      init?.status || 200,
+      body ?? null,
+      headers || init?.headers
+    ];
+  }
+  get headers() {
+    const cache = this[cacheKey];
+    if (cache) {
+      if (!(cache[2] instanceof Headers)) cache[2] = new Headers(cache[2] || (cache[1] === null ? void 0 : { "content-type": defaultContentType }));
+      return cache[2];
+    }
+    return this[getResponseCache]().headers;
+  }
+  get status() {
+    return this[cacheKey]?.[0] ?? this[getResponseCache]().status;
+  }
+  get ok() {
+    const status = this.status;
+    return status >= 200 && status < 300;
+  }
+};
+[
+  "body",
+  "bodyUsed",
+  "redirected",
+  "statusText",
+  "trailers",
+  "type",
+  "url"
+].forEach((k) => {
+  Object.defineProperty(Response$1.prototype, k, { get() {
+    return this[getResponseCache]()[k];
+  } });
+});
+[
+  "arrayBuffer",
+  "blob",
+  "clone",
+  "formData",
+  "json",
+  "text"
+].forEach((k) => {
+  Object.defineProperty(Response$1.prototype, k, { value: function() {
+    return this[getResponseCache]()[k]();
+  } });
+});
+Object.defineProperty(Response$1.prototype, /* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom"), { value: function(depth, options, inspectFn) {
+  return `Response (lightweight) ${inspectFn({
+    status: this.status,
+    headers: this.headers,
+    ok: this.ok,
+    nativeResponse: this[responseCache]
+  }, {
+    ...options,
+    depth: depth == null ? null : depth - 1
+  })}`;
+} });
+Object.setPrototypeOf(Response$1, GlobalResponse);
+Object.setPrototypeOf(Response$1.prototype, GlobalResponse.prototype);
+var validRedirectUrl = /^https?:\/\/[!#-;=?-[\]_a-z~A-Z]+$/;
+var parseRedirectUrl = (url2) => {
+  if (url2 instanceof URL) return url2.href;
+  if (validRedirectUrl.test(url2)) return url2;
+  return new URL(url2).href;
+};
+var validRedirectStatuses = /* @__PURE__ */ new Set([
+  301,
+  302,
+  303,
+  307,
+  308
+]);
+Object.defineProperty(Response$1, "redirect", {
+  value: function redirect(url2, status = 302) {
+    if (!validRedirectStatuses.has(status)) throw new RangeError("Invalid status code");
+    return new Response$1(null, {
+      status,
+      headers: { location: parseRedirectUrl(url2) }
+    });
+  },
+  writable: true,
+  configurable: true
+});
+Object.defineProperty(Response$1, "json", {
+  value: function json3(data, init) {
+    const body = JSON.stringify(data);
+    if (body === void 0) throw new TypeError("The data is not JSON serializable");
+    const initHeaders = init?.headers;
+    let headers;
+    if (initHeaders) {
+      headers = new Headers(initHeaders);
+      if (!headers.has("content-type")) headers.set("content-type", "application/json");
+    } else headers = { "content-type": "application/json" };
+    return new Response$1(body, {
+      status: init?.status ?? 200,
+      statusText: init?.statusText,
+      headers
+    });
+  },
+  writable: true,
+  configurable: true
+});
+async function readWithoutBlocking(readPromise) {
+  return Promise.race([readPromise, Promise.resolve().then(() => Promise.resolve(void 0))]);
+}
+function writeFromReadableStreamDefaultReader(reader, writable, currentReadPromise) {
+  const cancel = (error62) => {
+    reader.cancel(error62).catch(() => {
+    });
+  };
+  writable.on("close", cancel);
+  writable.on("error", cancel);
+  (currentReadPromise ?? reader.read()).then(flow, handleStreamError);
+  return reader.closed.finally(() => {
+    writable.off("close", cancel);
+    writable.off("error", cancel);
+  });
+  function handleStreamError(error62) {
+    if (error62) writable.destroy(error62);
+  }
+  function onDrain() {
+    reader.read().then(flow, handleStreamError);
+  }
+  function flow({ done, value }) {
+    try {
+      if (done) writable.end();
+      else if (!writable.write(value)) writable.once("drain", onDrain);
+      else return reader.read().then(flow, handleStreamError);
+    } catch (e) {
+      handleStreamError(e);
+    }
+  }
+}
+function writeFromReadableStream(stream, writable) {
+  if (stream.locked) throw new TypeError("ReadableStream is locked.");
+  else if (writable.destroyed) return;
+  return writeFromReadableStreamDefaultReader(stream.getReader(), writable);
+}
+var buildOutgoingHttpHeaders = (headers, defaultContentType2) => {
+  const res = {};
+  if (!(headers instanceof Headers)) headers = new Headers(headers ?? void 0);
+  if (headers.has("set-cookie")) {
+    const cookies = [];
+    for (const [k, v] of headers) if (k === "set-cookie") cookies.push(v);
+    else res[k] = v;
+    if (cookies.length > 0) res["set-cookie"] = cookies;
+  } else for (const [k, v] of headers) res[k] = v;
+  if (defaultContentType2) res["content-type"] ??= defaultContentType2;
+  return res;
+};
+var outgoingEnded = /* @__PURE__ */ Symbol("outgoingEnded");
+var incomingDraining = /* @__PURE__ */ Symbol("incomingDraining");
+var DRAIN_TIMEOUT_MS = 500;
+var MAX_DRAIN_BYTES = 64 * 1024 * 1024;
+var drainIncoming = (incoming) => {
+  const incomingWithDrainState = incoming;
+  if (incoming.destroyed || incomingWithDrainState[incomingDraining]) return;
+  incomingWithDrainState[incomingDraining] = true;
+  if (incoming instanceof Http2ServerRequest) {
+    try {
+      incoming.stream?.close?.(constants.NGHTTP2_NO_ERROR);
+    } catch {
+    }
+    return;
+  }
+  let bytesRead = 0;
+  const cleanup = () => {
+    clearTimeout(timer);
+    incoming.off("data", onData);
+    incoming.off("end", cleanup);
+    incoming.off("error", cleanup);
+  };
+  const forceClose = () => {
+    cleanup();
+    const socket = incoming.socket;
+    if (socket && !socket.destroyed) {
+      if (typeof socket.destroySoon === "function") socket.destroySoon();
+      else if (typeof socket.destroy === "function") socket.destroy();
+    }
+  };
+  const timer = setTimeout(forceClose, DRAIN_TIMEOUT_MS);
+  timer.unref?.();
+  const onData = (chunk) => {
+    bytesRead += chunk.length;
+    if (bytesRead > MAX_DRAIN_BYTES) forceClose();
+  };
+  incoming.on("data", onData);
+  incoming.on("end", cleanup);
+  incoming.on("error", cleanup);
+  incoming.resume();
+};
+var makeCloseHandler = (req, incoming, outgoing, needsBodyCleanup) => () => {
+  if (incoming.errored) {
+    recordBodyBufferedBeforeDisconnect(incoming);
+    req[abortRequest](incoming.errored.toString());
+  } else if (!outgoing.writableFinished || incoming instanceof Http2ServerRequest && incoming.aborted) {
+    recordBodyBufferedBeforeDisconnect(incoming);
+    req[abortRequest]("Client connection prematurely closed.");
+  }
+  if (needsBodyCleanup && !incoming.readableEnded) setTimeout(() => {
+    if (!incoming.readableEnded) setTimeout(() => {
+      drainIncoming(incoming);
+    });
+  });
+};
+var isImmediateCacheableResponse = (res) => {
+  if (!(cacheKey in res)) return false;
+  const body = res[cacheKey][1];
+  return body === null || typeof body === "string" || body instanceof Uint8Array;
+};
+var handleRequestError = () => new Response(null, { status: 400 });
+var handleFetchError = (e) => new Response(null, { status: e instanceof Error && (e.name === "TimeoutError" || e.constructor.name === "TimeoutError") ? 504 : 500 });
+var handleResponseError = (e, outgoing) => {
+  const err = e instanceof Error ? e : new Error("unknown error", { cause: e });
+  if (err.code === "ERR_STREAM_PREMATURE_CLOSE") console.info("The user aborted a request.");
+  else {
+    console.error(e);
+    if (!outgoing.headersSent) {
+      if (outgoing instanceof ServerResponse) outgoing._contentLength = null;
+      outgoing.writeHead(500, { "Content-Type": "text/plain" });
+    }
+    outgoing.end(`Error: ${err.message}`);
+    outgoing.destroy(err);
+  }
+};
+var flushHeaders = (outgoing) => {
+  if ("flushHeaders" in outgoing && outgoing.writable) outgoing.flushHeaders();
+};
+var trySetContentLength = (outgoing, status, length) => {
+  const http1 = outgoing;
+  if (http1._contentLength === null && http1._hasBody && http1.useChunkedEncodingByDefault && !http1._removedContLen && status >= 200 && status !== 204 && status !== 304 && !outgoing.hasHeader("content-length") && !outgoing.hasHeader("transfer-encoding") && !outgoing.hasHeader("trailer")) {
+    http1._contentLength = length;
+    return true;
+  }
+  return false;
+};
+var writeDefaultHeaders = (outgoing, status, length) => {
+  if (trySetContentLength(outgoing, status, length)) outgoing.writeHead(status, { "Content-Type": defaultContentType });
+  else outgoing.writeHead(status, {
+    "Content-Type": defaultContentType,
+    "Content-Length": length
+  });
+};
+var responseViaCache = async (res, outgoing) => {
+  let [status, body, header] = res[cacheKey];
+  if (!header) {
+    if (body === null) {
+      outgoing.writeHead(status);
+      outgoing.end();
+    } else if (typeof body === "string") {
+      writeDefaultHeaders(outgoing, status, Buffer.byteLength(body));
+      outgoing.end(body);
+    } else if (body instanceof Uint8Array) {
+      writeDefaultHeaders(outgoing, status, body.byteLength);
+      outgoing.end(body);
+    } else if (body instanceof Blob) {
+      writeDefaultHeaders(outgoing, status, body.size);
+      outgoing.end(new Uint8Array(await body.arrayBuffer()));
+    } else {
+      outgoing.writeHead(status, { "Content-Type": defaultContentType });
+      flushHeaders(outgoing);
+      await writeFromReadableStream(body, outgoing)?.catch((e) => handleResponseError(e, outgoing));
+    }
+    outgoing[outgoingEnded]?.();
+    return;
+  }
+  let hasContentLength = false;
+  let plainHeaders = false;
+  let canAutoLength = true;
+  if (header instanceof Headers) {
+    hasContentLength = header.has("content-length");
+    header = buildOutgoingHttpHeaders(header, body === null ? void 0 : defaultContentType);
+  } else if (Array.isArray(header)) {
+    const headerObj = new Headers(header);
+    hasContentLength = headerObj.has("content-length");
+    header = buildOutgoingHttpHeaders(headerObj, body === null ? void 0 : defaultContentType);
+  } else {
+    plainHeaders = true;
+    for (const key in header) {
+      if (key.length === 14 && key.toLowerCase() === "content-length") {
+        hasContentLength = true;
+        break;
+      }
+      if (key.length === 17 && key.toLowerCase() === "transfer-encoding" || key.length === 7 && key.toLowerCase() === "trailer") canAutoLength = false;
+    }
+  }
+  if (!hasContentLength) {
+    let length;
+    if (typeof body === "string") length = Buffer.byteLength(body);
+    else if (body instanceof Uint8Array) length = body.byteLength;
+    else if (body instanceof Blob) length = body.size;
+    if (length !== void 0 && (!plainHeaders || !canAutoLength || !trySetContentLength(outgoing, status, length))) {
+      if (plainHeaders) header = { ...header };
+      header["Content-Length"] = length;
+    }
+  }
+  outgoing.writeHead(status, header);
+  if (body == null) outgoing.end();
+  else if (typeof body === "string" || body instanceof Uint8Array) outgoing.end(body);
+  else if (body instanceof Blob) outgoing.end(new Uint8Array(await body.arrayBuffer()));
+  else {
+    flushHeaders(outgoing);
+    await writeFromReadableStream(body, outgoing)?.catch((e) => handleResponseError(e, outgoing));
+  }
+  outgoing[outgoingEnded]?.();
+};
+var isPromise = (res) => typeof res.then === "function";
+var responseViaResponseObject = async (res, outgoing, options = {}) => {
+  if (isPromise(res)) if (options.errorHandler) try {
+    res = await res;
+  } catch (err) {
+    const errRes = await options.errorHandler(err);
+    if (!errRes) return;
+    res = errRes;
+  }
+  else res = await res.catch(handleFetchError);
+  if (cacheKey in res) return responseViaCache(res, outgoing);
+  const resHeaderRecord = buildOutgoingHttpHeaders(res.headers, res.body === null ? void 0 : defaultContentType);
+  if (res.body) {
+    const reader = res.body.getReader();
+    const values = [];
+    let done = false;
+    let currentReadPromise = void 0;
+    if (resHeaderRecord["transfer-encoding"] !== "chunked") {
+      let maxReadCount = 2;
+      for (let i = 0; i < maxReadCount; i++) {
+        currentReadPromise ||= reader.read();
+        const chunk = await readWithoutBlocking(currentReadPromise).catch((e) => {
+          console.error(e);
+          done = true;
+        });
+        if (!chunk) {
+          if (i === 1) {
+            await new Promise((resolve3) => setTimeout(resolve3));
+            maxReadCount = 3;
+            continue;
+          }
+          break;
+        }
+        currentReadPromise = void 0;
+        if (chunk.value) values.push(chunk.value);
+        if (chunk.done) {
+          done = true;
+          break;
+        }
+      }
+      if (done && !("content-length" in resHeaderRecord)) resHeaderRecord["content-length"] = values.reduce((acc, value) => acc + value.length, 0);
+    }
+    outgoing.writeHead(res.status, resHeaderRecord);
+    values.forEach((value) => {
+      outgoing.write(value);
+    });
+    if (done) outgoing.end();
+    else {
+      if (values.length === 0) flushHeaders(outgoing);
+      await writeFromReadableStreamDefaultReader(reader, outgoing, currentReadPromise);
+    }
+  } else if (resHeaderRecord[X_ALREADY_SENT]) {
+  } else {
+    outgoing.writeHead(res.status, resHeaderRecord);
+    outgoing.end();
+  }
+  outgoing[outgoingEnded]?.();
+};
+var getRequestListener = (fetchCallback, options = {}) => {
+  const autoCleanupIncoming = options.autoCleanupIncoming ?? true;
+  if (options.overrideGlobalObjects !== false && global.Request !== Request$1) {
+    Object.defineProperty(global, "Request", { value: Request$1 });
+    Object.defineProperty(global, "Response", { value: Response$1 });
+  }
+  return async (incoming, outgoing) => {
+    let res, req;
+    let needsBodyCleanup = false;
+    let closeHandlerAttached = false;
+    const ensureCloseHandler = () => {
+      if (!req || closeHandlerAttached) return;
+      closeHandlerAttached = true;
+      outgoing.on("close", makeCloseHandler(req, incoming, outgoing, needsBodyCleanup));
+    };
+    try {
+      req = newRequest(incoming, options.hostname);
+      needsBodyCleanup = autoCleanupIncoming && !(incoming.method === "GET" || incoming.method === "HEAD");
+      if (needsBodyCleanup) {
+        incoming[wrapBodyStream] = true;
+        if (incoming instanceof Http2ServerRequest) outgoing[outgoingEnded] = () => {
+          if (!incoming.readableEnded) setTimeout(() => {
+            if (!incoming.readableEnded) setTimeout(() => {
+              incoming.destroy();
+              outgoing.destroy();
+            });
+          });
+        };
+      }
+      res = fetchCallback(req, {
+        incoming,
+        outgoing
+      });
+      if (!isPromise(res) && isImmediateCacheableResponse(res)) {
+        if (needsBodyCleanup && !incoming.readableEnded) outgoing.once("finish", () => {
+          if (!incoming.readableEnded) drainIncoming(incoming);
+        });
+        return responseViaCache(res, outgoing);
+      }
+      ensureCloseHandler();
+    } catch (e) {
+      if (!res) if (options.errorHandler) {
+        ensureCloseHandler();
+        res = await options.errorHandler(req ? e : toRequestError(e));
+        if (!res) return;
+      } else if (!req) res = handleRequestError();
+      else res = handleFetchError(e);
+      else return handleResponseError(e, outgoing);
+    }
+    try {
+      return await responseViaResponseObject(res, outgoing, options);
+    } catch (e) {
+      return handleResponseError(e, outgoing);
+    }
+  };
+};
+var CloseEvent = globalThis.CloseEvent ?? class extends Event {
+  #eventInitDict;
+  constructor(type, eventInitDict = {}) {
+    super(type, eventInitDict);
+    this.#eventInitDict = eventInitDict;
+  }
+  get wasClean() {
+    return this.#eventInitDict.wasClean ?? false;
+  }
+  get code() {
+    return this.#eventInitDict.code ?? 0;
+  }
+  get reason() {
+    return this.#eventInitDict.reason ?? "";
+  }
+};
+var ErrorEvent = globalThis.ErrorEvent ?? class extends Event {
+  #eventInitDict;
+  constructor(type, eventInitDict = {}) {
+    super(type, eventInitDict);
+    this.#eventInitDict = eventInitDict;
+  }
+  get message() {
+    return this.#eventInitDict.message ?? "";
+  }
+  get filename() {
+    return this.#eventInitDict.filename ?? "";
+  }
+  get lineno() {
+    return this.#eventInitDict.lineno ?? 0;
+  }
+  get colno() {
+    return this.#eventInitDict.colno ?? 0;
+  }
+  get error() {
+    return this.#eventInitDict.error ?? null;
+  }
+};
+var generateConnectionSymbol = () => /* @__PURE__ */ Symbol("connection");
+var CONNECTION_SYMBOL_KEY = /* @__PURE__ */ Symbol("CONNECTION_SYMBOL_KEY");
+var WAIT_FOR_WEBSOCKET_SYMBOL = /* @__PURE__ */ Symbol("WAIT_FOR_WEBSOCKET_SYMBOL");
+var upgradeWebSocket = defineWebSocketHelper(async (c, events, options) => {
+  if (c.req.header("upgrade")?.toLowerCase() !== "websocket") return;
+  const env = c.env;
+  const waitForWebSocket = env[WAIT_FOR_WEBSOCKET_SYMBOL];
+  if (!waitForWebSocket || !env.incoming) return new Response(null, { status: 500 });
+  const connectionSymbol = generateConnectionSymbol();
+  env[CONNECTION_SYMBOL_KEY] = connectionSymbol;
+  (async () => {
+    let ws;
+    try {
+      ws = await waitForWebSocket(env.incoming, connectionSymbol);
+    } catch {
+      return;
+    }
+    const messagesReceivedInStarting = [];
+    const bufferMessage = (data, isBinary) => {
+      messagesReceivedInStarting.push([data, isBinary]);
+    };
+    ws.on("message", bufferMessage);
+    const ctx = {
+      binaryType: "arraybuffer",
+      close(code, reason) {
+        ws.close(code, reason);
+      },
+      protocol: ws.protocol,
+      raw: ws,
+      get readyState() {
+        return ws.readyState;
+      },
+      send(source, opts) {
+        ws.send(source, { compress: opts?.compress });
+      },
+      url: new URL(c.req.url)
+    };
+    try {
+      events?.onOpen?.(new Event("open"), ctx);
+    } catch (e) {
+      (options?.onError ?? console.error)(e);
+    }
+    const handleMessage = (data, isBinary) => {
+      const datas = Array.isArray(data) ? data : [data];
+      for (const data2 of datas) try {
+        events?.onMessage?.(new MessageEvent("message", { data: isBinary ? data2 instanceof ArrayBuffer ? data2 : data2.buffer.slice(data2.byteOffset, data2.byteOffset + data2.byteLength) : typeof data2 === "string" ? data2 : Buffer.from(data2).toString("utf-8") }), ctx);
+      } catch (e) {
+        (options?.onError ?? console.error)(e);
+      }
+    };
+    ws.off("message", bufferMessage);
+    for (const message of messagesReceivedInStarting) handleMessage(...message);
+    ws.on("message", (data, isBinary) => {
+      handleMessage(data, isBinary);
+    });
+    ws.on("close", (code, reason) => {
+      try {
+        events?.onClose?.(new CloseEvent("close", {
+          code,
+          reason: reason.toString()
+        }), ctx);
+      } catch (e) {
+        (options?.onError ?? console.error)(e);
+      }
+    });
+    ws.on("error", (error62) => {
+      try {
+        events?.onError?.(new ErrorEvent("error", { error: error62 }), ctx);
+      } catch (e) {
+        (options?.onError ?? console.error)(e);
+      }
+    });
+  })();
+  return new Response();
+});
+
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.1_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/mediaType.js
+var import_content_type = __toESM(require_content_type(), 1);
+function mediaTypeEssence(header) {
+  if (!header) {
+    return void 0;
+  }
+  try {
+    return import_content_type.default.parse(header).type;
+  } catch {
+    const essence = (header.split(";", 1)[0] ?? "").trim().toLowerCase();
+    if (essence === "" || header.slice(essence.length).includes(",")) {
+      return void 0;
+    }
+    return essence;
+  }
+}
+function isJsonContentType(header) {
+  if (header === "application/json") {
+    return true;
+  }
+  return mediaTypeEssence(header) === "application/json";
+}
+
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.1_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/requestBody.js
+var DEFAULT_MAX_REQUEST_BODY_SIZE = 4 * 1024 * 1024;
+var MAX_BATCH_SIZE = 100;
+function requestBodyTooLargeMessage(maxBytes) {
+  return `Payload Too Large: Request body must not exceed ${maxBytes} bytes`;
+}
+function resolveMaxRequestBodySize(value) {
+  if (value === void 0) {
+    return DEFAULT_MAX_REQUEST_BODY_SIZE;
+  }
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    throw new RangeError(`maxRequestBodySize must be a positive number of bytes, got ${String(value)}`);
+  }
+  return value;
+}
+async function readRequestBody(request, maxBytes = DEFAULT_MAX_REQUEST_BODY_SIZE) {
+  if (Number(request.headers.get("content-length")) > maxBytes) {
+    return { tooLarge: true };
+  }
+  if (request.body === null) {
+    return { tooLarge: false, text: "" };
+  }
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder();
+  let received = 0;
+  let text = "";
+  try {
+    for (; ; ) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      received += value.byteLength;
+      if (received > maxBytes) {
+        return { tooLarge: true };
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  return { tooLarge: false, text: text + decoder.decode() };
+}
+
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.1_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/sseKeepAlive.js
+var DEFAULT_SSE_KEEP_ALIVE_MS = 15e3;
+var MAX_TIMER_DELAY_MS = 2 ** 31 - 1;
+function armSseKeepAlive(intervalMs, onTick) {
+  if (!Number.isFinite(intervalMs) || intervalMs < 1) {
+    return void 0;
+  }
+  const timer = setInterval(onTick, Math.min(intervalMs, MAX_TIMER_DELAY_MS));
+  timer.unref?.();
+  return timer;
+}
+
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.1_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/webStandardStreamableHttp.js
+var WebStandardStreamableHTTPServerTransport = class {
+  constructor(options = {}) {
+    this._started = false;
+    this._hasHandledRequest = false;
+    this._streamMapping = /* @__PURE__ */ new Map();
+    this._requestToStreamMapping = /* @__PURE__ */ new Map();
+    this._resumableStreams = /* @__PURE__ */ new Set();
+    this._requestResponseMap = /* @__PURE__ */ new Map();
+    this._initialized = false;
+    this._enableJsonResponse = false;
+    this._standaloneSseStreamId = "_GET_stream";
+    this._closed = false;
+    this.sessionIdGenerator = options.sessionIdGenerator;
+    this._enableJsonResponse = options.enableJsonResponse ?? false;
+    this._eventStore = options.eventStore;
+    this._onsessioninitialized = options.onsessioninitialized;
+    this._onsessionclosed = options.onsessionclosed;
+    this._allowedHosts = options.allowedHosts;
+    this._allowedOrigins = options.allowedOrigins;
+    this._enableDnsRebindingProtection = options.enableDnsRebindingProtection ?? false;
+    this._retryInterval = options.retryInterval;
+    this._keepAliveMs = options.keepAliveMs ?? DEFAULT_SSE_KEEP_ALIVE_MS;
+    this._maxRequestBodySize = resolveMaxRequestBodySize(options.maxRequestBodySize);
+  }
+  /**
+   * Arms a keep-alive interval for an SSE stream that periodically writes an SSE
+   * comment frame so intermediaries and idle timeouts don't kill the connection.
+   * The returned timer is owned by the stream it was armed for: the stream's
+   * cancel/cleanup callbacks must clear it. The interval clears itself if a
+   * write fails (stream already closed/cancelled).
+   */
+  startKeepAlive(controller, encoder) {
+    if (this._closed)
+      return void 0;
+    const timer = armSseKeepAlive(this._keepAliveMs, () => {
+      try {
+        controller.enqueue(encoder.encode(": keepalive\n\n"));
+      } catch {
+        if (timer !== void 0)
+          clearInterval(timer);
+      }
+    });
+    return timer;
+  }
+  /**
+   * Starts the transport. This is required by the Transport interface but is a no-op
+   * for the Streamable HTTP transport as connections are managed per-request.
+   */
+  async start() {
+    if (this._started) {
+      throw new Error("Transport already started");
+    }
+    this._started = true;
+  }
+  /**
+   * Helper to create a JSON error response
+   */
+  createJsonErrorResponse(status, code, message, options) {
+    const error62 = { code, message };
+    if (options?.data !== void 0) {
+      error62.data = options.data;
+    }
+    return new Response(JSON.stringify({
+      jsonrpc: "2.0",
+      error: error62,
+      id: null
+    }), {
+      status,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers
+      }
+    });
+  }
+  /**
+   * Validates request headers for DNS rebinding protection.
+   * @returns Error response if validation fails, undefined if validation passes.
+   */
+  validateRequestHeaders(req) {
+    if (!this._enableDnsRebindingProtection) {
+      return void 0;
+    }
+    if (this._allowedHosts && this._allowedHosts.length > 0) {
+      const hostHeader = req.headers.get("host");
+      if (!hostHeader || !this._allowedHosts.includes(hostHeader)) {
+        const error62 = `Invalid Host header: ${hostHeader}`;
+        this.onerror?.(new Error(error62));
+        return this.createJsonErrorResponse(403, -32e3, error62);
+      }
+    }
+    if (this._allowedOrigins && this._allowedOrigins.length > 0) {
+      const originHeader = req.headers.get("origin");
+      if (originHeader && !this._allowedOrigins.includes(originHeader)) {
+        const error62 = `Invalid Origin header: ${originHeader}`;
+        this.onerror?.(new Error(error62));
+        return this.createJsonErrorResponse(403, -32e3, error62);
+      }
+    }
+    return void 0;
+  }
+  /**
+   * Handles an incoming HTTP request, whether GET, POST, or DELETE
+   * Returns a Response object (Web Standard)
+   */
+  async handleRequest(req, options) {
+    if (this._closed) {
+      return this.createJsonErrorResponse(404, -32001, "Session not found");
+    }
+    if (!this.sessionIdGenerator && this._hasHandledRequest) {
+      throw new Error("Stateless transport cannot be reused across requests. Create a new transport per request.");
+    }
+    this._hasHandledRequest = true;
+    const validationError = this.validateRequestHeaders(req);
+    if (validationError) {
+      return validationError;
+    }
+    switch (req.method) {
+      case "POST":
+        return this.handlePostRequest(req, options);
+      case "GET":
+        return this.handleGetRequest(req);
+      case "DELETE":
+        return this.handleDeleteRequest(req);
+      default:
+        return this.handleUnsupportedRequest();
+    }
+  }
+  /**
+   * Writes a priming event to establish resumption capability.
+   * Only sends if eventStore is configured (opt-in for resumability) and
+   * the client's protocol version supports empty SSE data (>= 2025-11-25).
+   */
+  async writePrimingEvent(controller, encoder, streamId, protocolVersion) {
+    if (!this._eventStore) {
+      return;
+    }
+    if (protocolVersion < "2025-11-25") {
+      return;
+    }
+    const primingEventId = await this._eventStore.storeEvent(streamId, {});
+    let primingEvent = `id: ${primingEventId}
+data: 
+
+`;
+    if (this._retryInterval !== void 0) {
+      primingEvent = `id: ${primingEventId}
+retry: ${this._retryInterval}
+data: 
+
+`;
+    }
+    controller.enqueue(encoder.encode(primingEvent));
+    this._resumableStreams.add(streamId);
+  }
+  /**
+   * Handles GET requests for SSE stream
+   */
+  async handleGetRequest(req) {
+    const acceptHeader = req.headers.get("accept");
+    if (!acceptHeader?.includes("text/event-stream")) {
+      this.onerror?.(new Error("Not Acceptable: Client must accept text/event-stream"));
+      return this.createJsonErrorResponse(406, -32e3, "Not Acceptable: Client must accept text/event-stream");
+    }
+    const sessionError = this.validateSession(req);
+    if (sessionError) {
+      return sessionError;
+    }
+    const protocolError = this.validateProtocolVersion(req);
+    if (protocolError) {
+      return protocolError;
+    }
+    if (this._eventStore) {
+      const lastEventId = req.headers.get("last-event-id");
+      if (lastEventId) {
+        return this.replayEvents(lastEventId);
+      }
+    }
+    if (this._streamMapping.get(this._standaloneSseStreamId) !== void 0) {
+      this.onerror?.(new Error("Conflict: Only one SSE stream is allowed per session"));
+      return this.createJsonErrorResponse(409, -32e3, "Conflict: Only one SSE stream is allowed per session");
+    }
+    const encoder = new TextEncoder();
+    let streamController;
+    let keepAliveTimer = void 0;
+    const readable = new ReadableStream({
+      start: (controller) => {
+        streamController = controller;
+      },
+      cancel: () => {
+        if (keepAliveTimer !== void 0) {
+          clearInterval(keepAliveTimer);
+        }
+        if (this._streamMapping.get(this._standaloneSseStreamId)?.controller === streamController) {
+          this._streamMapping.delete(this._standaloneSseStreamId);
+        }
+      }
+    });
+    const headers = {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no"
+    };
+    if (this.sessionId !== void 0) {
+      headers["mcp-session-id"] = this.sessionId;
+    }
+    this._streamMapping.set(this._standaloneSseStreamId, {
+      controller: streamController,
+      encoder,
+      cleanup: () => {
+        if (keepAliveTimer !== void 0) {
+          clearInterval(keepAliveTimer);
+        }
+        this._streamMapping.delete(this._standaloneSseStreamId);
+        try {
+          streamController.close();
+        } catch {
+        }
+      }
+    });
+    keepAliveTimer = this.startKeepAlive(streamController, encoder);
+    return new Response(readable, { headers });
+  }
+  /**
+   * Replays events that would have been sent after the specified event ID
+   * Only used when resumability is enabled
+   */
+  async replayEvents(lastEventId) {
+    if (!this._eventStore) {
+      this.onerror?.(new Error("Event store not configured"));
+      return this.createJsonErrorResponse(400, -32e3, "Event store not configured");
+    }
+    try {
+      let streamId;
+      if (this._eventStore.getStreamIdForEventId) {
+        streamId = await this._eventStore.getStreamIdForEventId(lastEventId);
+        if (!streamId) {
+          this.onerror?.(new Error("Invalid event ID format"));
+          return this.createJsonErrorResponse(400, -32e3, "Invalid event ID format");
+        }
+        if (this._streamMapping.get(streamId) !== void 0) {
+          this.onerror?.(new Error("Conflict: Stream already has an active connection"));
+          return this.createJsonErrorResponse(409, -32e3, "Conflict: Stream already has an active connection");
+        }
+      }
+      const headers = {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no"
+      };
+      if (this.sessionId !== void 0) {
+        headers["mcp-session-id"] = this.sessionId;
+      }
+      const encoder = new TextEncoder();
+      let streamController;
+      let keepAliveTimer = void 0;
+      let replayedStreamId = void 0;
+      let cancelled = false;
+      const readable = new ReadableStream({
+        start: (controller) => {
+          streamController = controller;
+        },
+        cancel: () => {
+          cancelled = true;
+          if (keepAliveTimer !== void 0) {
+            clearInterval(keepAliveTimer);
+          }
+          if (replayedStreamId !== void 0 && this._streamMapping.get(replayedStreamId)?.controller === streamController) {
+            this._streamMapping.delete(replayedStreamId);
+          }
+        }
+      });
+      const replayedEventIds = /* @__PURE__ */ new Set();
+      replayedStreamId = await this._eventStore.replayEventsAfter(lastEventId, {
+        send: async (eventId, message) => {
+          const success2 = this.writeSSEEvent(streamController, encoder, message, eventId);
+          if (!success2) {
+            this.onerror?.(new Error("Failed replay events"));
+            try {
+              streamController.close();
+            } catch {
+            }
+          } else {
+            replayedEventIds.add(eventId);
+          }
+        }
+      });
+      if (this._closed || cancelled) {
+        try {
+          streamController.close();
+        } catch {
+        }
+        return this.createJsonErrorResponse(404, -32001, "Session not found");
+      }
+      this._streamMapping.get(replayedStreamId)?.cleanup();
+      this._streamMapping.set(replayedStreamId, {
+        controller: streamController,
+        encoder,
+        replayedEventIds,
+        cleanup: () => {
+          if (keepAliveTimer !== void 0) {
+            clearInterval(keepAliveTimer);
+          }
+          this._streamMapping.delete(replayedStreamId);
+          try {
+            streamController.close();
+          } catch {
+          }
+        }
+      });
+      this._resumableStreams.add(replayedStreamId);
+      keepAliveTimer = this.startKeepAlive(streamController, encoder);
+      return new Response(readable, { headers });
+    } catch (error62) {
+      this.onerror?.(error62);
+      return this.createJsonErrorResponse(500, -32e3, "Error replaying events");
+    }
+  }
+  /**
+   * Writes an event to an SSE stream via controller with proper formatting
+   */
+  writeSSEEvent(controller, encoder, message, eventId) {
+    try {
+      let eventData = `event: message
+`;
+      if (eventId) {
+        eventData += `id: ${eventId}
+`;
+      }
+      eventData += `data: ${JSON.stringify(message)}
+
+`;
+      controller.enqueue(encoder.encode(eventData));
+      return true;
+    } catch (error62) {
+      this.onerror?.(error62);
+      return false;
+    }
+  }
+  /**
+   * Handles unsupported requests (PUT, PATCH, etc.)
+   */
+  handleUnsupportedRequest() {
+    this.onerror?.(new Error("Method not allowed."));
+    return new Response(JSON.stringify({
+      jsonrpc: "2.0",
+      error: {
+        code: -32e3,
+        message: "Method not allowed."
+      },
+      id: null
+    }), {
+      status: 405,
+      headers: {
+        Allow: "GET, POST, DELETE",
+        "Content-Type": "application/json"
+      }
+    });
+  }
+  /**
+   * Handles POST requests containing JSON-RPC messages
+   */
+  async handlePostRequest(req, options) {
+    try {
+      const acceptHeader = req.headers.get("accept");
+      if (!acceptHeader?.includes("application/json") || !acceptHeader.includes("text/event-stream")) {
+        this.onerror?.(new Error("Not Acceptable: Client must accept both application/json and text/event-stream"));
+        return this.createJsonErrorResponse(406, -32e3, "Not Acceptable: Client must accept both application/json and text/event-stream");
+      }
+      const ct = req.headers.get("content-type");
+      if (!isJsonContentType(ct)) {
+        this.onerror?.(new Error("Unsupported Media Type: Content-Type must be application/json"));
+        return this.createJsonErrorResponse(415, -32e3, "Unsupported Media Type: Content-Type must be application/json");
+      }
+      const requestInfo = {
+        headers: Object.fromEntries(req.headers.entries()),
+        url: new URL(req.url)
+      };
+      let rawMessage;
+      if (options?.parsedBody !== void 0) {
+        rawMessage = options.parsedBody;
+      } else {
+        try {
+          const body = await readRequestBody(req, this._maxRequestBodySize);
+          if (body.tooLarge) {
+            const message = requestBodyTooLargeMessage(this._maxRequestBodySize);
+            this.onerror?.(new Error(message));
+            return this.createJsonErrorResponse(413, -32e3, message);
+          }
+          rawMessage = JSON.parse(body.text);
+        } catch {
+          this.onerror?.(new Error("Parse error: Invalid JSON"));
+          return this.createJsonErrorResponse(400, -32700, "Parse error: Invalid JSON");
+        }
+      }
+      if (Array.isArray(rawMessage) && rawMessage.length > MAX_BATCH_SIZE) {
+        this.onerror?.(new Error(`Invalid Request: Batch must not exceed ${MAX_BATCH_SIZE} messages`));
+        return this.createJsonErrorResponse(400, -32600, `Invalid Request: Batch must not exceed ${MAX_BATCH_SIZE} messages`);
+      }
+      let messages;
+      try {
+        if (Array.isArray(rawMessage)) {
+          messages = rawMessage.map((msg) => JSONRPCMessageSchema.parse(msg));
+        } else {
+          messages = [JSONRPCMessageSchema.parse(rawMessage)];
+        }
+      } catch {
+        this.onerror?.(new Error("Parse error: Invalid JSON-RPC message"));
+        return this.createJsonErrorResponse(400, -32700, "Parse error: Invalid JSON-RPC message");
+      }
+      if (this._closed) {
+        return this.createJsonErrorResponse(404, -32001, "Session not found");
+      }
+      const isInitializationRequest = messages.some(isInitializeRequest);
+      if (isInitializationRequest) {
+        if (this._initialized && this.sessionId !== void 0) {
+          this.onerror?.(new Error("Invalid Request: Server already initialized"));
+          return this.createJsonErrorResponse(400, -32600, "Invalid Request: Server already initialized");
+        }
+        if (messages.length > 1) {
+          this.onerror?.(new Error("Invalid Request: Only one initialization request is allowed"));
+          return this.createJsonErrorResponse(400, -32600, "Invalid Request: Only one initialization request is allowed");
+        }
+        this.sessionId = this.sessionIdGenerator?.();
+        this._initialized = true;
+        if (this.sessionId && this._onsessioninitialized) {
+          await Promise.resolve(this._onsessioninitialized(this.sessionId));
+        }
+      }
+      if (!isInitializationRequest) {
+        const sessionError = this.validateSession(req);
+        if (sessionError) {
+          return sessionError;
+        }
+        const protocolError = this.validateProtocolVersion(req);
+        if (protocolError) {
+          return protocolError;
+        }
+      }
+      if (this._closed) {
+        return this.createJsonErrorResponse(404, -32001, "Session not found");
+      }
+      const hasRequests = messages.some(isJSONRPCRequest);
+      if (!hasRequests) {
+        for (const message of messages) {
+          this.onmessage?.(message, { authInfo: options?.authInfo, requestInfo });
+        }
+        return new Response(null, { status: 202 });
+      }
+      const streamId = crypto.randomUUID();
+      const initRequest = messages.find((m) => isInitializeRequest(m));
+      const clientProtocolVersion = initRequest ? initRequest.params.protocolVersion : req.headers.get("mcp-protocol-version") ?? DEFAULT_NEGOTIATED_PROTOCOL_VERSION;
+      if (this._enableJsonResponse) {
+        return new Promise((resolve3) => {
+          this._streamMapping.set(streamId, {
+            resolveJson: resolve3,
+            cleanup: () => {
+              this._streamMapping.delete(streamId);
+            }
+          });
+          for (const message of messages) {
+            if (isJSONRPCRequest(message)) {
+              this._requestToStreamMapping.set(message.id, streamId);
+            }
+          }
+          for (const message of messages) {
+            this.onmessage?.(message, { authInfo: options?.authInfo, requestInfo });
+          }
+        });
+      }
+      const encoder = new TextEncoder();
+      let streamController;
+      let keepAliveTimer = void 0;
+      const readable = new ReadableStream({
+        start: (controller) => {
+          streamController = controller;
+        },
+        cancel: () => {
+          if (keepAliveTimer !== void 0) {
+            clearInterval(keepAliveTimer);
+          }
+          if (this._streamMapping.get(streamId)?.controller === streamController) {
+            this._streamMapping.delete(streamId);
+          }
+        }
+      });
+      const headers = {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no"
+      };
+      if (this.sessionId !== void 0) {
+        headers["mcp-session-id"] = this.sessionId;
+      }
+      for (const message of messages) {
+        if (isJSONRPCRequest(message)) {
+          this._streamMapping.set(streamId, {
+            controller: streamController,
+            encoder,
+            cleanup: () => {
+              if (keepAliveTimer !== void 0) {
+                clearInterval(keepAliveTimer);
+              }
+              this._streamMapping.delete(streamId);
+              try {
+                streamController.close();
+              } catch {
+              }
+            }
+          });
+          this._requestToStreamMapping.set(message.id, streamId);
+        }
+      }
+      try {
+        await this.writePrimingEvent(streamController, encoder, streamId, clientProtocolVersion);
+        for (const message of messages) {
+          let closeSSEStream;
+          let closeStandaloneSSEStream;
+          if (isJSONRPCRequest(message) && this._eventStore && clientProtocolVersion >= "2025-11-25") {
+            closeSSEStream = () => {
+              this.closeSSEStream(message.id);
+            };
+            closeStandaloneSSEStream = () => {
+              this.closeStandaloneSSEStream();
+            };
+          }
+          this.onmessage?.(message, { authInfo: options?.authInfo, requestInfo, closeSSEStream, closeStandaloneSSEStream });
+        }
+      } catch (error62) {
+        this._streamMapping.get(streamId)?.cleanup();
+        this._resumableStreams.delete(streamId);
+        for (const message of messages) {
+          if (isJSONRPCRequest(message)) {
+            this._requestToStreamMapping.delete(message.id);
+          }
+        }
+        throw error62;
+      }
+      if (this._streamMapping.get(streamId)?.controller === streamController) {
+        keepAliveTimer = this.startKeepAlive(streamController, encoder);
+      }
+      return new Response(readable, { status: 200, headers });
+    } catch (error62) {
+      this.onerror?.(error62);
+      return this.createJsonErrorResponse(400, -32700, "Parse error", { data: String(error62) });
+    }
+  }
+  /**
+   * Handles DELETE requests to terminate sessions
+   */
+  async handleDeleteRequest(req) {
+    const sessionError = this.validateSession(req);
+    if (sessionError) {
+      return sessionError;
+    }
+    const protocolError = this.validateProtocolVersion(req);
+    if (protocolError) {
+      return protocolError;
+    }
+    try {
+      await Promise.resolve(this._onsessionclosed?.(this.sessionId));
+      return new Response(null, { status: 200 });
+    } finally {
+      await this.close();
+    }
+  }
+  /**
+   * Validates session ID for non-initialization requests.
+   * Returns Response error if invalid, undefined otherwise
+   */
+  validateSession(req) {
+    if (this.sessionIdGenerator === void 0) {
+      return void 0;
+    }
+    if (!this._initialized) {
+      this.onerror?.(new Error("Bad Request: Server not initialized"));
+      return this.createJsonErrorResponse(400, -32e3, "Bad Request: Server not initialized");
+    }
+    const sessionId = req.headers.get("mcp-session-id");
+    if (!sessionId) {
+      this.onerror?.(new Error("Bad Request: Mcp-Session-Id header is required"));
+      return this.createJsonErrorResponse(400, -32e3, "Bad Request: Mcp-Session-Id header is required");
+    }
+    if (sessionId !== this.sessionId) {
+      this.onerror?.(new Error("Session not found"));
+      return this.createJsonErrorResponse(404, -32001, "Session not found");
+    }
+    return void 0;
+  }
+  /**
+   * Validates the MCP-Protocol-Version header on incoming requests.
+   *
+   * For initialization: Version negotiation handles unknown versions gracefully
+   * (server responds with its supported version).
+   *
+   * For subsequent requests with MCP-Protocol-Version header:
+   * - Accept if in supported list
+   * - 400 if unsupported
+   *
+   * For HTTP requests without the MCP-Protocol-Version header:
+   * - Accept and default to the version negotiated at initialization
+   */
+  validateProtocolVersion(req) {
+    const protocolVersion = req.headers.get("mcp-protocol-version");
+    if (protocolVersion !== null && !SUPPORTED_PROTOCOL_VERSIONS.includes(protocolVersion)) {
+      this.onerror?.(new Error(`Bad Request: Unsupported protocol version: ${protocolVersion} (supported versions: ${SUPPORTED_PROTOCOL_VERSIONS.join(", ")})`));
+      return this.createJsonErrorResponse(400, -32e3, `Bad Request: Unsupported protocol version: ${protocolVersion} (supported versions: ${SUPPORTED_PROTOCOL_VERSIONS.join(", ")})`);
+    }
+    return void 0;
+  }
+  async close() {
+    if (this._closed) {
+      return;
+    }
+    this._closed = true;
+    this._streamMapping.forEach(({ cleanup }) => {
+      cleanup();
+    });
+    this._streamMapping.clear();
+    this._requestResponseMap.clear();
+    this._resumableStreams.clear();
+    this.onclose?.();
+  }
+  /**
+   * Close an SSE stream for a specific request, triggering client reconnection.
+   * Use this to implement polling behavior during long-running operations -
+   * client will reconnect after the retry interval specified in the priming event.
+   */
+  closeSSEStream(requestId) {
+    const streamId = this._requestToStreamMapping.get(requestId);
+    if (!streamId)
+      return;
+    const stream = this._streamMapping.get(streamId);
+    if (stream) {
+      stream.cleanup();
+    }
+  }
+  /**
+   * Close the standalone GET SSE stream, triggering client reconnection.
+   * Use this to implement polling behavior for server-initiated notifications.
+   */
+  closeStandaloneSSEStream() {
+    const stream = this._streamMapping.get(this._standaloneSseStreamId);
+    if (stream) {
+      stream.cleanup();
+    }
+  }
+  async send(message, options) {
+    let requestId = options?.relatedRequestId;
+    if (isJSONRPCResultResponse(message) || isJSONRPCErrorResponse(message)) {
+      requestId = message.id;
+    }
+    if (requestId === void 0) {
+      if (isJSONRPCResultResponse(message) || isJSONRPCErrorResponse(message)) {
+        throw new Error("Cannot send a response on a standalone SSE stream unless resuming a previous client request");
+      }
+      let eventId;
+      if (this._eventStore) {
+        eventId = await this._eventStore.storeEvent(this._standaloneSseStreamId, message);
+      }
+      const standaloneSse = this._streamMapping.get(this._standaloneSseStreamId);
+      if (standaloneSse === void 0) {
+        return;
+      }
+      if (standaloneSse.controller && standaloneSse.encoder && (eventId === void 0 || !standaloneSse.replayedEventIds?.has(eventId))) {
+        this.writeSSEEvent(standaloneSse.controller, standaloneSse.encoder, message, eventId);
+      }
+      return;
+    }
+    const streamId = this._requestToStreamMapping.get(requestId);
+    if (!streamId) {
+      throw new Error(`No connection established for request ID: ${String(requestId)}`);
+    }
+    let stream = this._streamMapping.get(streamId);
+    if (!this._enableJsonResponse) {
+      let eventId;
+      if (this._eventStore) {
+        eventId = await this._eventStore.storeEvent(streamId, message);
+        stream = this._streamMapping.get(streamId);
+      }
+      if (stream?.controller && stream?.encoder && (eventId === void 0 || !stream.replayedEventIds?.has(eventId))) {
+        const written = this.writeSSEEvent(stream.controller, stream.encoder, message, eventId);
+        if (written && eventId !== void 0) {
+          this._resumableStreams.add(streamId);
+        }
+      }
+    }
+    if (isJSONRPCResultResponse(message) || isJSONRPCErrorResponse(message)) {
+      this._requestResponseMap.set(requestId, message);
+      const relatedIds = Array.from(this._requestToStreamMapping.entries()).filter(([_, sid]) => sid === streamId).map(([id]) => id);
+      const allResponsesReady = relatedIds.every((id) => this._requestResponseMap.has(id));
+      if (allResponsesReady) {
+        if (!stream) {
+          if (this._closed) {
+            for (const id of relatedIds) {
+              this._requestResponseMap.delete(id);
+              this._requestToStreamMapping.delete(id);
+            }
+            return;
+          }
+          if (!this._enableJsonResponse && this._eventStore && this._resumableStreams.has(streamId)) {
+            for (const id of relatedIds) {
+              this._requestResponseMap.delete(id);
+              this._requestToStreamMapping.delete(id);
+            }
+            this._resumableStreams.delete(streamId);
+            return;
+          }
+          for (const id of relatedIds) {
+            this._requestResponseMap.delete(id);
+            this._requestToStreamMapping.delete(id);
+          }
+          throw new Error(`No connection established for request ID: ${String(requestId)}`);
+        }
+        if (this._enableJsonResponse && stream.resolveJson) {
+          const headers = {
+            "Content-Type": "application/json"
+          };
+          if (this.sessionId !== void 0) {
+            headers["mcp-session-id"] = this.sessionId;
+          }
+          const responses = relatedIds.map((id) => this._requestResponseMap.get(id));
+          if (responses.length === 1) {
+            stream.resolveJson(new Response(JSON.stringify(responses[0]), { status: 200, headers }));
+          } else {
+            stream.resolveJson(new Response(JSON.stringify(responses), { status: 200, headers }));
+          }
+        } else {
+          stream.cleanup();
+        }
+        for (const id of relatedIds) {
+          this._requestResponseMap.delete(id);
+          this._requestToStreamMapping.delete(id);
+        }
+        this._resumableStreams.delete(streamId);
+      }
+    }
+  }
+};
+
+// node_modules/.pnpm/@modelcontextprotocol+sdk@1.32.1_zod@4.6.7/node_modules/@modelcontextprotocol/sdk/dist/esm/server/streamableHttp.js
+var StreamableHTTPServerTransport = class {
+  constructor(options = {}) {
+    this._requestContext = /* @__PURE__ */ new WeakMap();
+    this._webStandardTransport = new WebStandardStreamableHTTPServerTransport(options);
+    this._requestListener = getRequestListener(async (webRequest) => {
+      const context = this._requestContext.get(webRequest);
+      return this._webStandardTransport.handleRequest(webRequest, {
+        authInfo: context?.authInfo,
+        parsedBody: context?.parsedBody
+      });
+    }, { overrideGlobalObjects: false });
+  }
+  /**
+   * Gets the session ID for this transport instance.
+   */
+  get sessionId() {
+    return this._webStandardTransport.sessionId;
+  }
+  /**
+   * Sets callback for when the transport is closed.
+   */
+  set onclose(handler) {
+    this._webStandardTransport.onclose = handler;
+  }
+  get onclose() {
+    return this._webStandardTransport.onclose;
+  }
+  /**
+   * Sets callback for transport errors.
+   */
+  set onerror(handler) {
+    this._webStandardTransport.onerror = handler;
+  }
+  get onerror() {
+    return this._webStandardTransport.onerror;
+  }
+  /**
+   * Sets callback for incoming messages.
+   */
+  set onmessage(handler) {
+    this._webStandardTransport.onmessage = handler;
+  }
+  get onmessage() {
+    return this._webStandardTransport.onmessage;
+  }
+  /**
+   * Starts the transport. This is required by the Transport interface but is a no-op
+   * for the Streamable HTTP transport as connections are managed per-request.
+   */
+  async start() {
+    return this._webStandardTransport.start();
+  }
+  /**
+   * Closes the transport and all active connections.
+   */
+  async close() {
+    return this._webStandardTransport.close();
+  }
+  /**
+   * Sends a JSON-RPC message through the transport.
+   */
+  async send(message, options) {
+    return this._webStandardTransport.send(message, options);
+  }
+  /**
+   * Handles an incoming HTTP request, whether GET or POST.
+   *
+   * This method converts Node.js HTTP objects to Web Standard Request/Response
+   * and delegates to the underlying WebStandardStreamableHTTPServerTransport.
+   *
+   * @param req - Node.js IncomingMessage, optionally with auth property from middleware
+   * @param res - Node.js ServerResponse
+   * @param parsedBody - Optional pre-parsed body from body-parser middleware
+   */
+  async handleRequest(req, res, parsedBody) {
+    const authInfo = req.auth;
+    const handler = getRequestListener(async (webRequest) => {
+      return this._webStandardTransport.handleRequest(webRequest, {
+        authInfo,
+        parsedBody
+      });
+    }, { overrideGlobalObjects: false });
+    await handler(req, res);
+  }
+  /**
+   * Close an SSE stream for a specific request, triggering client reconnection.
+   * Use this to implement polling behavior during long-running operations -
+   * client will reconnect after the retry interval specified in the priming event.
+   */
+  closeSSEStream(requestId) {
+    this._webStandardTransport.closeSSEStream(requestId);
+  }
+  /**
+   * Close the standalone GET SSE stream, triggering client reconnection.
+   * Use this to implement polling behavior for server-initiated notifications.
+   */
+  closeStandaloneSSEStream() {
+    this._webStandardTransport.closeStandaloneSSEStream();
+  }
+};
+
+// src/http.ts
+var HTTP_HOST = "127.0.0.1";
+var DEFAULT_HTTP_PORT = 8788;
+var KEYCHAIN_SERVICE = "apple-photos-mcp";
+var KEYCHAIN_ACCOUNT = "bearer-token";
+var MAX_BODY_BYTES = 4 * 1024 * 1024;
+var DEFAULT_SESSION_TTL_MS = 24 * 60 * 60 * 1e3;
+function httpPort(env = process.env) {
+  const raw = env.APPLE_PHOTOS_MCP_HTTP_PORT;
+  if (raw === void 0 || raw.trim() === "") return DEFAULT_HTTP_PORT;
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 1 || n > 65535) {
+    throw new Error(`APPLE_PHOTOS_MCP_HTTP_PORT must be an integer 1-65535 (got "${raw}")`);
+  }
+  return n;
+}
+function loadBearerToken(env = process.env) {
+  const override = env.APPLE_PHOTOS_MCP_BEARER_TOKEN?.trim();
+  if (override) return override;
+  let token = "";
+  try {
+    token = execFileSync(
+      "/usr/bin/security",
+      ["find-generic-password", "-s", KEYCHAIN_SERVICE, "-a", KEYCHAIN_ACCOUNT, "-w"],
+      { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 15e3 }
+    ).trim();
+  } catch {
+  }
+  if (!token) {
+    throw new Error(
+      `HTTP mode requires a bearer token, but none was found. Expected a login-keychain generic password (service "${KEYCHAIN_SERVICE}", account "${KEYCHAIN_ACCOUNT}") or APPLE_PHOTOS_MCP_BEARER_TOKEN. Create it with scripts/hosting/install-launchagent.sh.`
+    );
+  }
+  return token;
+}
+function bearerMatches(header, token) {
+  const match = /^Bearer[ \t]+(\S+)[ \t]*$/i.exec(header ?? "");
+  if (!match || !token) return false;
+  const a = createHash("sha256").update(match[1]).digest();
+  const b = createHash("sha256").update(token).digest();
+  return timingSafeEqual(a, b);
+}
+function sendJson(res, status, body, headers = {}) {
+  res.writeHead(status, { "Content-Type": "application/json", ...headers });
+  res.end(JSON.stringify(body));
+}
+function rpcError(res, status, code, message) {
+  sendJson(res, status, { jsonrpc: "2.0", error: { code, message }, id: null });
+}
+var BodyTooLargeError = class extends Error {
+};
+async function readJsonBody(req) {
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += chunk.length;
+    if (size > MAX_BODY_BYTES) throw new BodyTooLargeError();
+    chunks.push(chunk);
+  }
+  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+}
+async function startHttpServer(opts) {
+  const sessions = /* @__PURE__ */ new Map();
+  const envTtl = Number(process.env.APPLE_PHOTOS_MCP_HTTP_SESSION_TTL_MS);
+  const ttl = opts.sessionTtlMs ?? (envTtl > 0 ? envTtl : DEFAULT_SESSION_TTL_MS);
+  const handle = async (req, res) => {
+    const path = (req.url ?? "/").split("?")[0];
+    if (path === "/healthz" && (req.method === "GET" || req.method === "HEAD")) {
+      res.writeHead(200, { "Content-Type": "text/plain" });
+      res.end(req.method === "HEAD" ? void 0 : "ok");
+      return;
+    }
+    if (!bearerMatches(req.headers.authorization, opts.token)) {
+      res.writeHead(401, { "WWW-Authenticate": 'Bearer realm="apple-photos-mcp"' });
+      res.end();
+      return;
+    }
+    if (path !== "/mcp" && path !== "/") {
+      res.writeHead(404).end();
+      return;
+    }
+    const sessionId = req.headers["mcp-session-id"];
+    const existing = typeof sessionId === "string" ? sessions.get(sessionId) : void 0;
+    if (existing) existing.lastSeen = Date.now();
+    if (req.method === "POST") {
+      let body;
+      try {
+        body = await readJsonBody(req);
+      } catch (err) {
+        if (err instanceof BodyTooLargeError) {
+          return rpcError(res, 413, -32600, "Request body too large");
+        }
+        return rpcError(res, 400, -32700, "Parse error: invalid JSON");
+      }
+      if (existing) {
+        await existing.transport.handleRequest(req, res, body);
+        return;
+      }
+      if (sessionId !== void 0) {
+        return rpcError(res, 404, -32001, "Session not found \u2014 re-initialize");
+      }
+      if (!isInitializeRequest(body)) {
+        return rpcError(res, 400, -32e3, "Bad Request: no valid session ID provided");
+      }
+      const server = opts.createServer();
+      const transport = withJsonSchema2020_12(
+        new StreamableHTTPServerTransport({
+          sessionIdGenerator: () => randomUUID(),
+          onsessioninitialized: (id) => {
+            sessions.set(id, { transport, server, lastSeen: Date.now() });
+          }
+        })
+      );
+      transport.onclose = () => {
+        if (transport.sessionId) sessions.delete(transport.sessionId);
+      };
+      await server.connect(transport);
+      await transport.handleRequest(req, res, body);
+      return;
+    }
+    if (req.method === "GET" || req.method === "DELETE") {
+      if (!existing) {
+        return sessionId === void 0 ? rpcError(res, 400, -32e3, "Bad Request: missing mcp-session-id") : rpcError(res, 404, -32001, "Session not found \u2014 re-initialize");
+      }
+      await existing.transport.handleRequest(req, res);
+      return;
+    }
+    res.writeHead(405, { Allow: "GET, POST, DELETE" }).end();
+  };
+  const httpServer = createHttpServer((req, res) => {
+    handle(req, res).catch((err) => {
+      console.error("[http] request failed:", err instanceof Error ? err.message : err);
+      if (!res.headersSent) rpcError(res, 500, -32603, "Internal server error");
+      else res.end();
+    });
+  });
+  const sweep = setInterval(
+    () => {
+      const cutoff = Date.now() - ttl;
+      for (const [id, s] of sessions) {
+        if (s.lastSeen < cutoff) {
+          sessions.delete(id);
+          s.server.close().catch(() => {
+          });
+        }
+      }
+    },
+    Math.min(ttl, 5 * 60 * 1e3)
+  );
+  sweep.unref();
+  httpServer.on("close", () => clearInterval(sweep));
+  await new Promise((resolve3, reject) => {
+    httpServer.once("error", reject);
+    httpServer.listen(opts.port, HTTP_HOST, () => {
+      httpServer.off("error", reject);
+      resolve3();
+    });
+  });
+  return httpServer;
+}
+
 // src/index.ts
 loadFileConfig();
+var READ_ONLY = writesEnabled({ [WRITES_ENV]: process.env.APPLE_PHOTOS_MCP_READ_ONLY });
+if (READ_ONLY) delete process.env[WRITES_ENV];
+var WRITE_TOOL_NAMES = /* @__PURE__ */ new Set([
+  "create-album",
+  "add-to-album",
+  "remove-from-album",
+  "set-photo-metadata",
+  "set-keywords",
+  "set-photo-date",
+  "import-photos"
+]);
 var __filename2 = fileURLToPath2(import.meta.url);
 var __dirname2 = dirname3(__filename2);
 var pkg = JSON.parse(readFileSync3(join6(__dirname2, "..", "package.json"), "utf-8"));
 var version2 = pkg.version;
 var manager = new PhotosManager();
-var server = new McpServer({
-  name: "apple-photos",
-  version: version2,
-  description: "MCP server for Apple Photos via osxphotos. Query the Photos library by date, import date, album, keyword, person, ML label, place, GPS radius, year, media type (screenshot, selfie, panorama, burst, \u2026), file size, aesthetic score, OCR-detected text, or favorite/hidden flags; list albums/folders/keywords/persons; fetch full photo metadata (location, dimensions, EXIF camera data, ML score, detected text, shared-album comments/likes, burst siblings, type flags) singly or in batches; read the live Photos.app selection; return inline viewable thumbnails; find exact-duplicate groups; and export originals or edited versions to a directory. Read-only against the Photos library BY DEFAULT: the write tools (create-album, add-to-album, remove-from-album, set-photo-metadata, set-keywords, set-photo-date, import-photos) only work when the user opts in with APPLE_PHOTOS_MCP_ENABLE_WRITES=1, and can never delete photos. Read tools also return structuredContent (typed JSON) alongside the text."
-});
-var libraryArg = {
-  library: external_exports.string().max(4096).optional().describe("Path to a .photoslibrary (default: system Photos library)")
-};
-var uuidSchema = external_exports.string().max(256).regex(
-  /^[0-9A-Fa-f-]+$/,
-  "must be a Photos UUID \u2014 hexadecimal segments separated by dashes (e.g. 1EB2B765-0765-43BA-A90C-0F0AE547B343)"
-);
-function registerTool(name, config2, cb) {
-  return registerToolWithContracts(server, name, config2, cb);
-}
-registerTool(
-  "health-check",
-  {
-    description: "Use when: you want a quick smoke test that osxphotos is installed and the Photos library can be opened.\nReturns: ok/fail plus the osxphotos version, library path, and total photo count. While another operation (a long query or export) is running, it responds immediately with a liveness summary instead of queueing behind it \u2014 re-run after the operation completes for the full result.\nDo not use when: you need a full setup diagnostic that pinpoints whether the failure is a missing osxphotos, an unreadable library, or denied Full Disk Access \u2014 use doctor instead.",
-    inputSchema: {},
-    outputSchema: {
-      ok: external_exports.boolean().optional(),
-      message: external_exports.string().optional()
-    }
-  },
-  withErrorHandling(async () => {
-    const result = await manager.healthCheck();
-    return successResponse(result.ok ? `OK ${result.message}` : `FAIL ${result.message}`, {
-      ...result
-    });
-  }, "health-check")
-);
-registerTool(
-  "doctor",
-  {
-    description: "Use when: a tool returns a permission, 'unable to open', or 'write tools are disabled' error, or you want a full setup diagnostic before querying, exporting, or writing.\nReturns: six checks \u2014 Python interpreter (path + version; warns below 3.11), osxphotos install, sidecar mode (persistent vs one-shot, plus last respawn), the write-tools gate (enabled/disabled, with the opt-in recipe and \u2014 when enabled \u2014 whether the photoscript backend and Photos.app look usable), Photos library readability, and Full Disk Access \u2014 each reported ok/warn/fail with actionable advice.\nDo not use when: you only need the lightweight is-it-working smoke test \u2014 use health-check instead.",
-    inputSchema: {},
-    outputSchema: {
-      healthy: external_exports.boolean().optional(),
-      checks: external_exports.array(
-        external_exports.object({
-          name: external_exports.string().optional(),
-          status: external_exports.string().optional(),
-          detail: external_exports.string().optional()
-        }).passthrough()
-      ).optional()
-    }
-  },
-  withErrorHandling(async () => {
-    const report = await runDoctor(manager);
-    return successResponse(formatDoctorReport(report), { ...report });
-  }, "doctor")
-);
-registerTool(
-  "library-info",
-  {
-    description: "Use when: you want high-level stats about the whole library \u2014 total counts of photos, movies, albums, folders, keywords, and persons \u2014 or to confirm which library you're targeting before drilling in.\nReturns: the library path, Photos DB and Photos.app versions, and the six counts.\nDo not use when: you want the actual albums/keywords/persons rather than just their counts \u2014 use list-albums / list-keywords / list-persons; or you want to find specific photos \u2014 use query.",
-    inputSchema: libraryArg,
-    outputSchema: {
-      libraryPath: external_exports.string().optional(),
-      dbVersion: external_exports.string().optional(),
-      photosVersion: external_exports.union([external_exports.string(), external_exports.number()]).optional(),
-      photoCount: external_exports.number().optional(),
-      movieCount: external_exports.number().optional(),
-      totalCount: external_exports.number().optional(),
-      albumCount: external_exports.number().optional(),
-      folderCount: external_exports.number().optional(),
-      keywordCount: external_exports.number().optional(),
-      personCount: external_exports.number().optional()
-    }
-  },
-  withErrorHandling(async ({ library }) => {
-    const info = await manager.getLibraryInfo(library);
-    return successResponse(
-      `Library: ${info.libraryPath}
+function createServer2() {
+  const server = new McpServer({
+    name: "apple-photos",
+    version: version2,
+    description: "MCP server for Apple Photos via osxphotos. Query the Photos library by date, import date, album, keyword, person, ML label, place, GPS radius, year, media type (screenshot, selfie, panorama, burst, \u2026), file size, aesthetic score, OCR-detected text, or favorite/hidden flags; list albums/folders/keywords/persons; fetch full photo metadata (location, dimensions, EXIF camera data, ML score, detected text, shared-album comments/likes, burst siblings, type flags) singly or in batches; read the live Photos.app selection; return inline viewable thumbnails; find exact-duplicate groups; and export originals or edited versions to a directory. " + (READ_ONLY ? "This instance is STRICTLY read-only: no tool can modify the Photos library. " : "Read-only against the Photos library BY DEFAULT: the write tools (create-album, add-to-album, remove-from-album, set-photo-metadata, set-keywords, set-photo-date, import-photos) only work when the user opts in with APPLE_PHOTOS_MCP_ENABLE_WRITES=1, and can never delete photos. ") + "Read tools also return structuredContent (typed JSON) alongside the text."
+  });
+  const libraryArg = {
+    library: external_exports.string().max(4096).optional().describe("Path to a .photoslibrary (default: system Photos library)")
+  };
+  const uuidSchema = external_exports.string().max(256).regex(
+    /^[0-9A-Fa-f-]+$/,
+    "must be a Photos UUID \u2014 hexadecimal segments separated by dashes (e.g. 1EB2B765-0765-43BA-A90C-0F0AE547B343)"
+  );
+  function registerTool(name, config2, cb) {
+    if (READ_ONLY && WRITE_TOOL_NAMES.has(name)) return void 0;
+    return registerToolWithContracts(server, name, config2, cb);
+  }
+  registerTool(
+    "health-check",
+    {
+      description: "Use when: you want a quick smoke test that osxphotos is installed and the Photos library can be opened.\nReturns: ok/fail plus the osxphotos version, library path, and total photo count. While another operation (a long query or export) is running, it responds immediately with a liveness summary instead of queueing behind it \u2014 re-run after the operation completes for the full result.\nDo not use when: you need a full setup diagnostic that pinpoints whether the failure is a missing osxphotos, an unreadable library, or denied Full Disk Access \u2014 use doctor instead.",
+      inputSchema: {},
+      outputSchema: {
+        ok: external_exports.boolean().optional(),
+        message: external_exports.string().optional()
+      }
+    },
+    withErrorHandling(async () => {
+      const result = await manager.healthCheck();
+      return successResponse(result.ok ? `OK ${result.message}` : `FAIL ${result.message}`, {
+        ...result
+      });
+    }, "health-check")
+  );
+  registerTool(
+    "doctor",
+    {
+      description: "Use when: a tool returns a permission, 'unable to open', or 'write tools are disabled' error, or you want a full setup diagnostic before querying, exporting, or writing.\nReturns: six checks \u2014 Python interpreter (path + version; warns below 3.11), osxphotos install, sidecar mode (persistent vs one-shot, plus last respawn), the write-tools gate (enabled/disabled, with the opt-in recipe and \u2014 when enabled \u2014 whether the photoscript backend and Photos.app look usable), Photos library readability, and Full Disk Access \u2014 each reported ok/warn/fail with actionable advice.\nDo not use when: you only need the lightweight is-it-working smoke test \u2014 use health-check instead.",
+      inputSchema: {},
+      outputSchema: {
+        healthy: external_exports.boolean().optional(),
+        checks: external_exports.array(
+          external_exports.object({
+            name: external_exports.string().optional(),
+            status: external_exports.string().optional(),
+            detail: external_exports.string().optional()
+          }).passthrough()
+        ).optional()
+      }
+    },
+    withErrorHandling(async () => {
+      const report = await runDoctor(manager);
+      return successResponse(formatDoctorReport(report), { ...report });
+    }, "doctor")
+  );
+  registerTool(
+    "library-info",
+    {
+      description: "Use when: you want high-level stats about the whole library \u2014 total counts of photos, movies, albums, folders, keywords, and persons \u2014 or to confirm which library you're targeting before drilling in.\nReturns: the library path, Photos DB and Photos.app versions, and the six counts.\nDo not use when: you want the actual albums/keywords/persons rather than just their counts \u2014 use list-albums / list-keywords / list-persons; or you want to find specific photos \u2014 use query.",
+      inputSchema: libraryArg,
+      outputSchema: {
+        libraryPath: external_exports.string().optional(),
+        dbVersion: external_exports.string().optional(),
+        photosVersion: external_exports.union([external_exports.string(), external_exports.number()]).optional(),
+        photoCount: external_exports.number().optional(),
+        movieCount: external_exports.number().optional(),
+        totalCount: external_exports.number().optional(),
+        albumCount: external_exports.number().optional(),
+        folderCount: external_exports.number().optional(),
+        keywordCount: external_exports.number().optional(),
+        personCount: external_exports.number().optional()
+      }
+    },
+    withErrorHandling(async ({ library }) => {
+      const info = await manager.getLibraryInfo(library);
+      return successResponse(
+        `Library: ${info.libraryPath}
 Photos DB version: ${info.dbVersion} (Photos.app ${info.photosVersion})
 
 Photos:    ${info.photoCount}
@@ -38769,714 +41176,720 @@ Albums:    ${info.albumCount}
 Folders:   ${info.folderCount}
 Keywords:  ${info.keywordCount}
 Persons:   ${info.personCount}`,
-      { ...info }
-    );
-  }, "library-info")
-);
-registerTool(
-  "query",
-  {
-    description: "Use when: you need to find photos matching one or more filters \u2014 album, keyword, person, ML label, place, GPS radius (near), folder, taken-date or import-date range (addedAfter/addedInLast for 'recently imported'), year, file size, media type (screenshot, screen recording, selfie, panorama, live, portrait, time-lapse, slow-mo, burst, video), aesthetic score (minScore), OCR-detected text (detectedText), favorite/hidden flags, or title/description substrings \u2014 and get back a list of matches. This is the primary search/discovery tool; start here when you don't already have a UUID. Hidden photos are excluded unless hidden=true. Pass newestFirst=true with a limit to get the N most recent matches.\nReturns: count (the TOTAL number of matches), returned (the number of summaries in this response \u2014 capped at limit, default 500), and photo summaries (UUID, filename, date, dimensions, favorite/hidden/movie flags) \u2014 feed a UUID into get-photo/get-photos for full metadata, get-thumbnail to see it, or export to copy files.\nDo not use when: you already have UUIDs and want full metadata \u2014 use get-photo / get-photos; you want to see an image \u2014 use get-thumbnail; or you just want the catalog of album/keyword/person names \u2014 use list-albums / list-keywords / list-persons.",
-    inputSchema: {
-      ...libraryArg,
-      uuid: external_exports.array(external_exports.string().max(256)).max(1e3).optional().describe("Specific UUIDs to fetch"),
-      album: external_exports.array(external_exports.string().max(1024)).max(100).optional().describe("Album name(s); ANY-match"),
-      keyword: external_exports.array(external_exports.string().max(1024)).max(100).optional().describe("Keyword(s); ANY-match"),
-      person: external_exports.array(external_exports.string().max(1024)).max(100).optional().describe("Person name(s); ANY-match"),
-      fromDate: external_exports.string().max(64).optional().describe("ISO 8601 lower bound on photo date"),
-      toDate: external_exports.string().max(64).optional().describe(
-        "ISO 8601 upper bound on photo date. A bare date (e.g. 2025-06-30) includes that whole day; pass a full datetime (e.g. 2025-06-30T18:00:00) for a precise exclusive bound"
-      ),
-      favorite: external_exports.boolean().optional().describe("Only favorites"),
-      notFavorite: external_exports.boolean().optional().describe("Exclude favorites"),
-      hidden: external_exports.boolean().optional().describe("Only hidden photos"),
-      notHidden: external_exports.boolean().optional().describe("Exclude hidden photos (default behavior)"),
-      photos: external_exports.boolean().optional().describe("Include still photos"),
-      movies: external_exports.boolean().optional().describe("Include movies"),
-      title: external_exports.string().max(1024).optional().describe("Substring match on title"),
-      description: external_exports.string().max(2048).optional().describe("Substring match on description"),
-      addedAfter: external_exports.string().max(64).optional().describe(
-        "ISO 8601 inclusive lower bound on IMPORT date (dateAdded \u2014 when the photo entered the library, not when it was taken)"
-      ),
-      addedBefore: external_exports.string().max(64).optional().describe(
-        "ISO 8601 upper bound on IMPORT date. A bare date includes that whole day; a full datetime is a precise exclusive bound"
-      ),
-      addedInLast: external_exports.string().max(32).regex(
-        /^\s*\d+(\.\d+)?\s*[smhdw]\s*$/i,
-        'must be <number><unit> with unit s/m/h/d/w \u2014 e.g. "7d", "24h"'
-      ).optional().describe(
-        'Imported within the trailing duration \u2014 "<number><unit>", unit s(econds) / m(inutes) / h(ours) / d(ays) / w(eeks), e.g. "7d" or "24h". The natural way to express "recently imported"'
-      ),
-      label: external_exports.array(external_exports.string().max(1024)).max(100).optional().describe(
-        "ML classification label(s) from Photos object detection (the labels field of get-photo, e.g. Dog, Beach, Text); ANY-match, exact whole-string"
-      ),
-      folder: external_exports.array(external_exports.string().max(1024)).max(100).optional().describe(
-        "Folder name(s)/path(s) \u2014 matches photos in albums that live inside the folder; ANY-match (see list-folders for names)"
-      ),
-      place: external_exports.array(external_exports.string().max(1024)).max(100).optional().describe(
-        "Place-name substring(s) from reverse geocoding (city, region, landmark). NOTE: multiple values are ANDed, not ORed \u2014 a photo must match every value"
-      ),
-      hasLocation: external_exports.boolean().optional().describe(
-        "true = only photos WITH GPS coordinates; false = only photos WITHOUT; omit for no location filter"
-      ),
-      year: external_exports.array(integerNumber().min(0).max(9999)).max(100).optional().describe("Taken in calendar year(s); ANY-match (e.g. [2024, 2025])"),
-      minSize: integerNumber().positive().optional().describe("Original file size at least this many bytes"),
-      maxSize: integerNumber().positive().optional().describe("Original file size at most this many bytes"),
-      noKeyword: external_exports.boolean().optional().describe("Only photos carrying no keyword at all"),
-      burst: external_exports.boolean().optional().describe("Only burst photos"),
-      screenshot: external_exports.boolean().optional().describe("Only screenshots"),
-      screenRecording: external_exports.boolean().optional().describe("Only screen recordings"),
-      selfie: external_exports.boolean().optional().describe("Only selfies (front-camera photos)"),
-      panorama: external_exports.boolean().optional().describe("Only panoramas"),
-      live: external_exports.boolean().optional().describe("Only live photos"),
-      portrait: external_exports.boolean().optional().describe("Only portrait-mode (depth-effect) photos"),
-      timelapse: external_exports.boolean().optional().describe("Only time-lapse videos"),
-      slowMo: external_exports.boolean().optional().describe("Only slow-motion videos"),
-      video: external_exports.boolean().optional().describe("Only videos/movies (alias of movies)"),
-      near: external_exports.string().max(128).regex(
-        /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*,\s*\d+(\.\d+)?\s*$/,
-        'must be "lat,lon,radiusKm" \u2014 three numbers, e.g. "46.5,-87.4,5"'
-      ).optional().describe(
-        'GPS-radius filter: "lat,lon,radiusKm" \u2014 only photos within radiusKm of the point (great-circle distance). Composes (AND) with every other filter. Requires location data: photos without GPS coordinates never match'
-      ),
-      minScore: external_exports.number().min(0).max(1).optional().describe(
-        "Only photos whose Photos-computed overall aesthetic score (0\u20131) is at least this \u2014 e.g. 0.7 for 'the good ones'. Post-filter over the other filters' matches; photos without a computed score never match"
-      ),
-      detectedText: external_exports.string().min(1).max(256).optional().describe(
-        "Case-insensitive substring match over the text Photos' own OCR indexed in each photo (macOS 13+) \u2014 receipts, signs, screenshots. Post-filter that reads per-photo search info over every other filter's matches, so combine it with narrowing filters (dates, album) on big libraries"
-      ),
-      newestFirst: external_exports.boolean().optional().describe(
-        "Sort matches by taken date, newest first, BEFORE limit is applied \u2014 so limit means 'the N most recent matches' instead of 'N in database order'"
-      ),
-      limit: integerNumber().positive().max(1e5).optional().describe(
-        "Cap the number of results returned (default 500 when omitted; count still reports the total matches)"
-      )
+        { ...info }
+      );
+    }, "library-info")
+  );
+  registerTool(
+    "query",
+    {
+      description: "Use when: you need to find photos matching one or more filters \u2014 album, keyword, person, ML label, place, GPS radius (near), folder, taken-date or import-date range (addedAfter/addedInLast for 'recently imported'), year, file size, media type (screenshot, screen recording, selfie, panorama, live, portrait, time-lapse, slow-mo, burst, video), aesthetic score (minScore), OCR-detected text (detectedText), favorite/hidden flags, or title/description substrings \u2014 and get back a list of matches. This is the primary search/discovery tool; start here when you don't already have a UUID. Hidden photos are excluded unless hidden=true. Pass newestFirst=true with a limit to get the N most recent matches.\nReturns: count (the TOTAL number of matches), returned (the number of summaries in this response \u2014 capped at limit, default 500), and photo summaries (UUID, filename, date, dimensions, favorite/hidden/movie flags) \u2014 feed a UUID into get-photo/get-photos for full metadata, get-thumbnail to see it, or export to copy files.\nDo not use when: you already have UUIDs and want full metadata \u2014 use get-photo / get-photos; you want to see an image \u2014 use get-thumbnail; or you just want the catalog of album/keyword/person names \u2014 use list-albums / list-keywords / list-persons.",
+      inputSchema: {
+        ...libraryArg,
+        uuid: external_exports.array(external_exports.string().max(256)).max(1e3).optional().describe("Specific UUIDs to fetch"),
+        album: external_exports.array(external_exports.string().max(1024)).max(100).optional().describe("Album name(s); ANY-match"),
+        keyword: external_exports.array(external_exports.string().max(1024)).max(100).optional().describe("Keyword(s); ANY-match"),
+        person: external_exports.array(external_exports.string().max(1024)).max(100).optional().describe("Person name(s); ANY-match"),
+        fromDate: external_exports.string().max(64).optional().describe("ISO 8601 lower bound on photo date"),
+        toDate: external_exports.string().max(64).optional().describe(
+          "ISO 8601 upper bound on photo date. A bare date (e.g. 2025-06-30) includes that whole day; pass a full datetime (e.g. 2025-06-30T18:00:00) for a precise exclusive bound"
+        ),
+        favorite: external_exports.boolean().optional().describe("Only favorites"),
+        notFavorite: external_exports.boolean().optional().describe("Exclude favorites"),
+        hidden: external_exports.boolean().optional().describe("Only hidden photos"),
+        notHidden: external_exports.boolean().optional().describe("Exclude hidden photos (default behavior)"),
+        photos: external_exports.boolean().optional().describe("Include still photos"),
+        movies: external_exports.boolean().optional().describe("Include movies"),
+        title: external_exports.string().max(1024).optional().describe("Substring match on title"),
+        description: external_exports.string().max(2048).optional().describe("Substring match on description"),
+        addedAfter: external_exports.string().max(64).optional().describe(
+          "ISO 8601 inclusive lower bound on IMPORT date (dateAdded \u2014 when the photo entered the library, not when it was taken)"
+        ),
+        addedBefore: external_exports.string().max(64).optional().describe(
+          "ISO 8601 upper bound on IMPORT date. A bare date includes that whole day; a full datetime is a precise exclusive bound"
+        ),
+        addedInLast: external_exports.string().max(32).regex(
+          /^\s*\d+(\.\d+)?\s*[smhdw]\s*$/i,
+          'must be <number><unit> with unit s/m/h/d/w \u2014 e.g. "7d", "24h"'
+        ).optional().describe(
+          'Imported within the trailing duration \u2014 "<number><unit>", unit s(econds) / m(inutes) / h(ours) / d(ays) / w(eeks), e.g. "7d" or "24h". The natural way to express "recently imported"'
+        ),
+        label: external_exports.array(external_exports.string().max(1024)).max(100).optional().describe(
+          "ML classification label(s) from Photos object detection (the labels field of get-photo, e.g. Dog, Beach, Text); ANY-match, exact whole-string"
+        ),
+        folder: external_exports.array(external_exports.string().max(1024)).max(100).optional().describe(
+          "Folder name(s)/path(s) \u2014 matches photos in albums that live inside the folder; ANY-match (see list-folders for names)"
+        ),
+        place: external_exports.array(external_exports.string().max(1024)).max(100).optional().describe(
+          "Place-name substring(s) from reverse geocoding (city, region, landmark). NOTE: multiple values are ANDed, not ORed \u2014 a photo must match every value"
+        ),
+        hasLocation: external_exports.boolean().optional().describe(
+          "true = only photos WITH GPS coordinates; false = only photos WITHOUT; omit for no location filter"
+        ),
+        year: external_exports.array(integerNumber().min(0).max(9999)).max(100).optional().describe("Taken in calendar year(s); ANY-match (e.g. [2024, 2025])"),
+        minSize: integerNumber().positive().optional().describe("Original file size at least this many bytes"),
+        maxSize: integerNumber().positive().optional().describe("Original file size at most this many bytes"),
+        noKeyword: external_exports.boolean().optional().describe("Only photos carrying no keyword at all"),
+        burst: external_exports.boolean().optional().describe("Only burst photos"),
+        screenshot: external_exports.boolean().optional().describe("Only screenshots"),
+        screenRecording: external_exports.boolean().optional().describe("Only screen recordings"),
+        selfie: external_exports.boolean().optional().describe("Only selfies (front-camera photos)"),
+        panorama: external_exports.boolean().optional().describe("Only panoramas"),
+        live: external_exports.boolean().optional().describe("Only live photos"),
+        portrait: external_exports.boolean().optional().describe("Only portrait-mode (depth-effect) photos"),
+        timelapse: external_exports.boolean().optional().describe("Only time-lapse videos"),
+        slowMo: external_exports.boolean().optional().describe("Only slow-motion videos"),
+        video: external_exports.boolean().optional().describe("Only videos/movies (alias of movies)"),
+        near: external_exports.string().max(128).regex(
+          /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*,\s*\d+(\.\d+)?\s*$/,
+          'must be "lat,lon,radiusKm" \u2014 three numbers, e.g. "46.5,-87.4,5"'
+        ).optional().describe(
+          'GPS-radius filter: "lat,lon,radiusKm" \u2014 only photos within radiusKm of the point (great-circle distance). Composes (AND) with every other filter. Requires location data: photos without GPS coordinates never match'
+        ),
+        minScore: external_exports.number().min(0).max(1).optional().describe(
+          "Only photos whose Photos-computed overall aesthetic score (0\u20131) is at least this \u2014 e.g. 0.7 for 'the good ones'. Post-filter over the other filters' matches; photos without a computed score never match"
+        ),
+        detectedText: external_exports.string().min(1).max(256).optional().describe(
+          "Case-insensitive substring match over the text Photos' own OCR indexed in each photo (macOS 13+) \u2014 receipts, signs, screenshots. Post-filter that reads per-photo search info over every other filter's matches, so combine it with narrowing filters (dates, album) on big libraries"
+        ),
+        newestFirst: external_exports.boolean().optional().describe(
+          "Sort matches by taken date, newest first, BEFORE limit is applied \u2014 so limit means 'the N most recent matches' instead of 'N in database order'"
+        ),
+        limit: integerNumber().positive().max(1e5).optional().describe(
+          "Cap the number of results returned (default 500 when omitted; count still reports the total matches)"
+        )
+      },
+      outputSchema: {
+        count: external_exports.number().optional(),
+        returned: external_exports.number().optional(),
+        photos: external_exports.array(external_exports.object({}).passthrough()).optional()
+      }
     },
-    outputSchema: {
-      count: external_exports.number().optional(),
-      returned: external_exports.number().optional(),
-      photos: external_exports.array(external_exports.object({}).passthrough()).optional()
-    }
-  },
-  withErrorHandling(async ({ library, ...filters }) => {
-    const result = await manager.query(filters, library);
-    if (result.count === 0) {
-      return successResponse("No photos matched the query.", {
-        count: 0,
-        returned: 0,
-        photos: []
+    withErrorHandling(async ({ library, ...filters }) => {
+      const result = await manager.query(filters, library);
+      if (result.count === 0) {
+        return successResponse("No photos matched the query.", {
+          count: 0,
+          returned: 0,
+          photos: []
+        });
+      }
+      const lines = result.photos.map((p) => {
+        const flags = [];
+        if (p.favorite) flags.push("\u2605");
+        if (p.hidden) flags.push("hidden");
+        if (p.isMovie) flags.push("movie");
+        const flagStr = flags.length ? ` [${flags.join(", ")}]` : "";
+        const dims = p.width && p.height ? ` ${p.width}\xD7${p.height}` : "";
+        return `${p.date ?? "?"} ${p.uuid} \u2014 ${p.filename}${dims}${flagStr}`;
       });
-    }
-    const lines = result.photos.map((p) => {
-      const flags = [];
-      if (p.favorite) flags.push("\u2605");
-      if (p.hidden) flags.push("hidden");
-      if (p.isMovie) flags.push("movie");
-      const flagStr = flags.length ? ` [${flags.join(", ")}]` : "";
-      const dims = p.width && p.height ? ` ${p.width}\xD7${p.height}` : "";
-      return `${p.date ?? "?"} ${p.uuid} \u2014 ${p.filename}${dims}${flagStr}`;
-    });
-    const returned = result.returned ?? result.photos.length;
-    const header = result.count > returned ? `Found ${result.count} photo(s), returning the first ${returned} (raise limit for more):` : `Found ${result.count} photo(s):`;
-    return successResponse(`${header}
+      const returned = result.returned ?? result.photos.length;
+      const header = result.count > returned ? `Found ${result.count} photo(s), returning the first ${returned} (raise limit for more):` : `Found ${result.count} photo(s):`;
+      return successResponse(`${header}
 
 ${lines.join("\n")}`, {
-      count: result.count,
-      returned,
-      photos: result.photos
-    });
-  }, "query")
-);
-registerTool(
-  "get-photo",
-  {
-    description: "Use when: you have a single photo's UUID (typically from query) and want its complete metadata.\nReturns: dimensions and original dimensions, dates, title/description, location and place, albums, keywords, persons, labels, file paths, size, EXIF camera data (make/model, lens, ISO, aperture, shutter speed, focal length \u2014 null when Photos recorded none), Photos' ML intelligence (score = overall aesthetic 0\u20131, detectedText = OCR-indexed text; null on macOS versions without them), iCloud shared-album social data (owner, comments, likes \u2014 only populated for shared assets), and type flags (HDR/live/raw/edited/portrait/panorama/etc.). Pass burstPhotos=true to also list the sibling frames of a burst (UUID, filename, date each).\nDo not use when: you don't have a UUID yet \u2014 use query to find matches first; you have several UUIDs \u2014 use get-photos for one batched call; or you want to see the image \u2014 use get-thumbnail.",
-    inputSchema: {
-      ...libraryArg,
-      uuid: uuidSchema.describe("Photo UUID (hex-with-dashes, as returned by query)"),
-      burstPhotos: external_exports.boolean().optional().describe(
-        "true = include burstPhotos: the OTHER frames of this photo's burst set (empty when the photo is not a burst member)"
-      )
+        count: result.count,
+        returned,
+        photos: result.photos
+      });
+    }, "query")
+  );
+  registerTool(
+    "get-photo",
+    {
+      description: "Use when: you have a single photo's UUID (typically from query) and want its complete metadata.\nReturns: dimensions and original dimensions, dates, title/description, location and place, albums, keywords, persons, labels, file paths, size, EXIF camera data (make/model, lens, ISO, aperture, shutter speed, focal length \u2014 null when Photos recorded none), Photos' ML intelligence (score = overall aesthetic 0\u20131, detectedText = OCR-indexed text; null on macOS versions without them), iCloud shared-album social data (owner, comments, likes \u2014 only populated for shared assets), and type flags (HDR/live/raw/edited/portrait/panorama/etc.). Pass burstPhotos=true to also list the sibling frames of a burst (UUID, filename, date each).\nDo not use when: you don't have a UUID yet \u2014 use query to find matches first; you have several UUIDs \u2014 use get-photos for one batched call; or you want to see the image \u2014 use get-thumbnail.",
+      inputSchema: {
+        ...libraryArg,
+        uuid: uuidSchema.describe("Photo UUID (hex-with-dashes, as returned by query)"),
+        burstPhotos: external_exports.boolean().optional().describe(
+          "true = include burstPhotos: the OTHER frames of this photo's burst set (empty when the photo is not a burst member)"
+        )
+      },
+      outputSchema: {
+        photo: external_exports.object({}).passthrough().optional()
+      }
     },
-    outputSchema: {
-      photo: external_exports.object({}).passthrough().optional()
-    }
-  },
-  withErrorHandling(async ({ library, uuid: uuid3, burstPhotos }) => {
-    const p = await manager.getPhoto(uuid3, library, burstPhotos);
-    const lines = [
-      `UUID:        ${p.uuid}`,
-      `Filename:    ${p.filename}`,
-      `Date:        ${p.date ?? "(none)"}`,
-      `Title:       ${p.title ?? "(none)"}`,
-      `Description: ${p.description ?? "(none)"}`,
-      `Dimensions:  ${p.width}\xD7${p.height}` + (p.originalWidth && p.originalWidth !== p.width ? ` (original ${p.originalWidth}\xD7${p.originalHeight})` : ""),
-      `Type:        ${p.isMovie ? "movie" : "photo"}${p.isRaw ? " (raw)" : ""}${p.isEdited ? " (edited)" : ""}`,
-      `Path:        ${p.path ?? "(missing)"}`
-    ];
-    if (p.location) {
-      lines.push(`Location:    ${p.location.latitude}, ${p.location.longitude}`);
-    }
-    if (p.place?.name) {
-      lines.push(`Place:       ${p.place.name}${p.place.country ? ` (${p.place.country})` : ""}`);
-    }
-    if (p.albums.length) lines.push(`Albums:      ${p.albums.join(", ")}`);
-    if (p.keywords.length) lines.push(`Keywords:    ${p.keywords.join(", ")}`);
-    if (p.persons.length) lines.push(`Persons:     ${p.persons.join(", ")}`);
-    if (p.labels.length) lines.push(`Labels:      ${p.labels.join(", ")}`);
-    if (p.exif && (p.exif.cameraMake || p.exif.cameraModel)) {
-      const camera = [p.exif.cameraMake, p.exif.cameraModel].filter(Boolean).join(" ");
-      const settings = [
-        p.exif.iso != null ? `ISO ${p.exif.iso}` : null,
-        p.exif.aperture != null ? `f/${p.exif.aperture}` : null,
-        p.exif.focalLength != null ? `${p.exif.focalLength}mm` : null
-      ].filter(Boolean).join(", ");
-      lines.push(`Camera:      ${camera}${settings ? ` (${settings})` : ""}`);
-    }
-    if (p.score != null) lines.push(`Score:       ${p.score.toFixed(3)} (Photos aesthetic, 0\u20131)`);
-    if (p.detectedText && p.detectedText.length > 0) {
-      const joined = p.detectedText.join(" | ");
-      lines.push(`Text (OCR):  ${joined.length > 300 ? `${joined.slice(0, 300)}\u2026` : joined}`);
-    }
-    if (p.owner) lines.push(`Owner:       ${p.owner} (shared album)`);
-    if (p.comments?.length) {
-      lines.push(`Comments:    ${p.comments.length} (full text in structuredContent)`);
-    }
-    if (p.likes?.length) lines.push(`Likes:       ${p.likes.length}`);
-    if (p.burstPhotos !== void 0) {
-      lines.push(
-        p.burstPhotos.length > 0 ? `Burst:       ${p.burstPhotos.length} sibling frame(s): ` + p.burstPhotos.map((b) => b.uuid).join(", ") : "Burst:       no sibling frames (not a burst member)"
-      );
-    }
-    return successResponse(lines.join("\n"), { photo: p });
-  }, "get-photo")
-);
-registerTool(
-  "get-photos",
-  {
-    description: "Use when: you have SEVERAL UUIDs (typically from query or find-duplicates) and want full metadata for all of them \u2014 a dedupe review, an EXIF audit, a captioning pass. One batched sidecar round-trip (max 50 UUIDs) instead of N get-photo calls.\nReturns: count, photos (full per-photo detail \u2014 the same shape as get-photo, including the exif block, score, detectedText, and shared-album owner/comments/likes), and notFound listing any requested UUIDs that matched nothing.\nDo not use when: you have a single UUID \u2014 use get-photo; you don't have UUIDs yet \u2014 use query; or you want to see the images \u2014 use get-thumbnail per photo.",
-    inputSchema: {
-      ...libraryArg,
-      uuid: external_exports.array(uuidSchema).min(1).max(50).describe("Photo UUIDs (1\u201350, as returned by query)")
+    withErrorHandling(async ({ library, uuid: uuid3, burstPhotos }) => {
+      const p = await manager.getPhoto(uuid3, library, burstPhotos);
+      const lines = [
+        `UUID:        ${p.uuid}`,
+        `Filename:    ${p.filename}`,
+        `Date:        ${p.date ?? "(none)"}`,
+        `Title:       ${p.title ?? "(none)"}`,
+        `Description: ${p.description ?? "(none)"}`,
+        `Dimensions:  ${p.width}\xD7${p.height}` + (p.originalWidth && p.originalWidth !== p.width ? ` (original ${p.originalWidth}\xD7${p.originalHeight})` : ""),
+        `Type:        ${p.isMovie ? "movie" : "photo"}${p.isRaw ? " (raw)" : ""}${p.isEdited ? " (edited)" : ""}`,
+        `Path:        ${p.path ?? "(missing)"}`
+      ];
+      if (p.location) {
+        lines.push(`Location:    ${p.location.latitude}, ${p.location.longitude}`);
+      }
+      if (p.place?.name) {
+        lines.push(`Place:       ${p.place.name}${p.place.country ? ` (${p.place.country})` : ""}`);
+      }
+      if (p.albums.length) lines.push(`Albums:      ${p.albums.join(", ")}`);
+      if (p.keywords.length) lines.push(`Keywords:    ${p.keywords.join(", ")}`);
+      if (p.persons.length) lines.push(`Persons:     ${p.persons.join(", ")}`);
+      if (p.labels.length) lines.push(`Labels:      ${p.labels.join(", ")}`);
+      if (p.exif && (p.exif.cameraMake || p.exif.cameraModel)) {
+        const camera = [p.exif.cameraMake, p.exif.cameraModel].filter(Boolean).join(" ");
+        const settings = [
+          p.exif.iso != null ? `ISO ${p.exif.iso}` : null,
+          p.exif.aperture != null ? `f/${p.exif.aperture}` : null,
+          p.exif.focalLength != null ? `${p.exif.focalLength}mm` : null
+        ].filter(Boolean).join(", ");
+        lines.push(`Camera:      ${camera}${settings ? ` (${settings})` : ""}`);
+      }
+      if (p.score != null) lines.push(`Score:       ${p.score.toFixed(3)} (Photos aesthetic, 0\u20131)`);
+      if (p.detectedText && p.detectedText.length > 0) {
+        const joined = p.detectedText.join(" | ");
+        lines.push(`Text (OCR):  ${joined.length > 300 ? `${joined.slice(0, 300)}\u2026` : joined}`);
+      }
+      if (p.owner) lines.push(`Owner:       ${p.owner} (shared album)`);
+      if (p.comments?.length) {
+        lines.push(`Comments:    ${p.comments.length} (full text in structuredContent)`);
+      }
+      if (p.likes?.length) lines.push(`Likes:       ${p.likes.length}`);
+      if (p.burstPhotos !== void 0) {
+        lines.push(
+          p.burstPhotos.length > 0 ? `Burst:       ${p.burstPhotos.length} sibling frame(s): ` + p.burstPhotos.map((b) => b.uuid).join(", ") : "Burst:       no sibling frames (not a burst member)"
+        );
+      }
+      return successResponse(lines.join("\n"), { photo: p });
+    }, "get-photo")
+  );
+  registerTool(
+    "get-photos",
+    {
+      description: "Use when: you have SEVERAL UUIDs (typically from query or find-duplicates) and want full metadata for all of them \u2014 a dedupe review, an EXIF audit, a captioning pass. One batched sidecar round-trip (max 50 UUIDs) instead of N get-photo calls.\nReturns: count, photos (full per-photo detail \u2014 the same shape as get-photo, including the exif block, score, detectedText, and shared-album owner/comments/likes), and notFound listing any requested UUIDs that matched nothing.\nDo not use when: you have a single UUID \u2014 use get-photo; you don't have UUIDs yet \u2014 use query; or you want to see the images \u2014 use get-thumbnail per photo.",
+      inputSchema: {
+        ...libraryArg,
+        uuid: external_exports.array(uuidSchema).min(1).max(50).describe("Photo UUIDs (1\u201350, as returned by query)")
+      },
+      outputSchema: {
+        count: external_exports.number().optional(),
+        photos: external_exports.array(external_exports.object({}).passthrough()).optional(),
+        notFound: external_exports.array(external_exports.string()).optional()
+      }
     },
-    outputSchema: {
-      count: external_exports.number().optional(),
-      photos: external_exports.array(external_exports.object({}).passthrough()).optional(),
-      notFound: external_exports.array(external_exports.string()).optional()
-    }
-  },
-  withErrorHandling(async ({ library, uuid: uuid3 }) => {
-    const result = await manager.getPhotos(uuid3, library);
-    const lines = result.photos.map((p) => {
-      const flags = [];
-      if (p.favorite) flags.push("\u2605");
-      if (p.hidden) flags.push("hidden");
-      if (p.isMovie) flags.push("movie");
-      if (p.isEdited) flags.push("edited");
-      const flagStr = flags.length ? ` [${flags.join(", ")}]` : "";
-      const dims = p.width && p.height ? ` ${p.width}\xD7${p.height}` : "";
-      const camera = p.exif?.cameraModel ? ` \u2014 ${p.exif.cameraModel}` : "";
-      return `${p.date ?? "?"} ${p.uuid} \u2014 ${p.filename}${dims}${flagStr}${camera}`;
-    });
-    if (result.notFound.length) {
-      lines.push("", `Not found: ${result.notFound.join(", ")}`);
-    }
-    return successResponse(
-      `${result.count} photo(s) (full details in structuredContent):
+    withErrorHandling(async ({ library, uuid: uuid3 }) => {
+      const result = await manager.getPhotos(uuid3, library);
+      const lines = result.photos.map((p) => {
+        const flags = [];
+        if (p.favorite) flags.push("\u2605");
+        if (p.hidden) flags.push("hidden");
+        if (p.isMovie) flags.push("movie");
+        if (p.isEdited) flags.push("edited");
+        const flagStr = flags.length ? ` [${flags.join(", ")}]` : "";
+        const dims = p.width && p.height ? ` ${p.width}\xD7${p.height}` : "";
+        const camera = p.exif?.cameraModel ? ` \u2014 ${p.exif.cameraModel}` : "";
+        return `${p.date ?? "?"} ${p.uuid} \u2014 ${p.filename}${dims}${flagStr}${camera}`;
+      });
+      if (result.notFound.length) {
+        lines.push("", `Not found: ${result.notFound.join(", ")}`);
+      }
+      return successResponse(
+        `${result.count} photo(s) (full details in structuredContent):
 
 ${lines.join("\n")}`,
-      { count: result.count, photos: result.photos, notFound: result.notFound }
-    );
-  }, "get-photos")
-);
-registerTool(
-  "get-thumbnail",
-  {
-    description: "Use when: you (or the user) want to SEE a photo \u2014 visual triage ('show me\u2026'), picking the best shot, eyeballing duplicate groups, or reading text in an image \u2014 without exporting anything to disk. Prefer this over export whenever the goal is to LOOK at a photo rather than to obtain the file.\nReturns: the photo as an inline MCP image content block (base64 JPEG/PNG a vision-capable client renders directly), plus a text summary and structured metadata (source path, width/height, MIME type, byte size, isDerivative). It serves the smallest Photos-generated preview derivative whose long edge is at least minSize pixels (default 360) \u2014 raise minSize (e.g. 1024) when you need detail like small text; isDerivative=false means no suitable derivative existed and the original was downscaled/converted via sips.\nDo not use when: you need the full-resolution file on disk \u2014 use export; or you only need metadata \u2014 use get-photo. Movies get a thumbnail only when Photos generated a poster-frame derivative; an iCloud-only photo with no local derivative or original cannot be thumbnailed (export it first, which downloads on demand).",
-    inputSchema: {
-      ...libraryArg,
-      uuid: uuidSchema.describe("Photo UUID (hex-with-dashes, as returned by query)"),
-      minSize: integerNumber().positive().max(8192).optional().describe(
-        "Smallest acceptable long-edge size in pixels (default 360). The smallest qualifying derivative is served, so higher values return larger images"
-      )
+        { count: result.count, photos: result.photos, notFound: result.notFound }
+      );
+    }, "get-photos")
+  );
+  registerTool(
+    "get-thumbnail",
+    {
+      description: "Use when: you (or the user) want to SEE a photo \u2014 visual triage ('show me\u2026'), picking the best shot, eyeballing duplicate groups, or reading text in an image \u2014 without exporting anything to disk. Prefer this over export whenever the goal is to LOOK at a photo rather than to obtain the file.\nReturns: the photo as an inline MCP image content block (base64 JPEG/PNG a vision-capable client renders directly), plus a text summary and structured metadata (source path, width/height, MIME type, byte size, isDerivative). It serves the smallest Photos-generated preview derivative whose long edge is at least minSize pixels (default 360) \u2014 raise minSize (e.g. 1024) when you need detail like small text; isDerivative=false means no suitable derivative existed and the original was downscaled/converted via sips.\nDo not use when: you need the full-resolution file on disk \u2014 use export; or you only need metadata \u2014 use get-photo. Movies get a thumbnail only when Photos generated a poster-frame derivative; an iCloud-only photo with no local derivative or original cannot be thumbnailed (export it first, which downloads on demand).",
+      inputSchema: {
+        ...libraryArg,
+        uuid: uuidSchema.describe("Photo UUID (hex-with-dashes, as returned by query)"),
+        minSize: integerNumber().positive().max(8192).optional().describe(
+          "Smallest acceptable long-edge size in pixels (default 360). The smallest qualifying derivative is served, so higher values return larger images"
+        )
+      },
+      outputSchema: {
+        uuid: external_exports.string().optional(),
+        path: external_exports.string().optional(),
+        width: external_exports.number().nullable().optional(),
+        height: external_exports.number().nullable().optional(),
+        mimeType: external_exports.string().optional(),
+        byteSize: external_exports.number().optional(),
+        isDerivative: external_exports.boolean().optional()
+      }
     },
-    outputSchema: {
-      uuid: external_exports.string().optional(),
-      path: external_exports.string().optional(),
-      width: external_exports.number().nullable().optional(),
-      height: external_exports.number().nullable().optional(),
-      mimeType: external_exports.string().optional(),
-      byteSize: external_exports.number().optional(),
-      isDerivative: external_exports.boolean().optional()
-    }
-  },
-  withErrorHandling(async ({ library, uuid: uuid3, minSize }) => {
-    const t = await manager.getThumbnail(uuid3, minSize, library);
-    const { base64: base643, ...meta3 } = t;
-    const dims = t.width && t.height ? `${t.width}\xD7${t.height}` : "unknown dimensions";
-    const source = t.isDerivative ? "Photos derivative" : "rendered from original";
-    return imageResponse(
-      `Thumbnail for ${t.uuid}: ${dims} ${t.mimeType}, ${Math.round(t.byteSize / 1024)} KB (${source})`,
-      { data: base643, mimeType: t.mimeType },
-      { ...meta3 }
-    );
-  }, "get-thumbnail")
-);
-registerTool(
-  "get-selected-photos",
-  {
-    description: `Use when: the user says "these photos" / "the selected photos" \u2014 they have photos selected in the Photos.app window and you need their identities. This is the GUI-selection bridge: feed the returned UUIDs into get-photos, get-thumbnail, export, or add-to-album.
+    withErrorHandling(async ({ library, uuid: uuid3, minSize }) => {
+      const t = await manager.getThumbnail(uuid3, minSize, library);
+      const { base64: base643, ...meta3 } = t;
+      const dims = t.width && t.height ? `${t.width}\xD7${t.height}` : "unknown dimensions";
+      const source = t.isDerivative ? "Photos derivative" : "rendered from original";
+      return imageResponse(
+        `Thumbnail for ${t.uuid}: ${dims} ${t.mimeType}, ${Math.round(t.byteSize / 1024)} KB (${source})`,
+        { data: base643, mimeType: t.mimeType },
+        { ...meta3 }
+      );
+    }, "get-thumbnail")
+  );
+  registerTool(
+    "get-selected-photos",
+    {
+      description: `Use when: the user says "these photos" / "the selected photos" \u2014 they have photos selected in the Photos.app window and you need their identities. This is the GUI-selection bridge: feed the returned UUIDs into get-photos, get-thumbnail, export, or add-to-album.
 Returns: count, the same photo summaries as query (UUID, filename, date, dimensions, flags), and notFound for selected items the library index doesn't know yet (e.g. a just-finished import Photos hasn't checkpointed \u2014 each with its filename for identification).
 Do not use when: you want to FIND photos by criteria \u2014 use query; or Photos.app isn't running / nothing is selected \u2014 both return a clear error, and this tool never launches Photos itself.
 Note: read-only, but it reads the selection from Photos.app via AppleScript, so it requires Photos.app running with a visible selection, and macOS Automation permission for the host app (one-time system prompt on first use). The selection comes from the library currently open in Photos.app.`,
-    inputSchema: {},
-    outputSchema: {
-      count: external_exports.number().optional(),
-      photos: external_exports.array(external_exports.object({}).passthrough()).optional(),
-      notFound: external_exports.array(external_exports.object({}).passthrough()).optional()
-    }
-  },
-  withErrorHandling(async () => {
-    const result = await manager.getSelectedPhotos();
-    const lines = result.photos.map((p) => {
-      const flags = [];
-      if (p.favorite) flags.push("\u2605");
-      if (p.hidden) flags.push("hidden");
-      if (p.isMovie) flags.push("movie");
-      const flagStr = flags.length ? ` [${flags.join(", ")}]` : "";
-      const dims = p.width && p.height ? ` ${p.width}\xD7${p.height}` : "";
-      return `${p.date ?? "?"} ${p.uuid} \u2014 ${p.filename}${dims}${flagStr}`;
-    });
-    if (result.notFound.length > 0) {
-      lines.push(
-        "",
-        "Selected but not in the library index yet (likely just imported):",
-        ...result.notFound.map((n) => `  ${n.uuid}${n.filename ? ` \u2014 ${n.filename}` : ""}`)
-      );
-    }
-    return successResponse(
-      `${result.count} selected photo(s) in Photos.app:
+      inputSchema: {},
+      outputSchema: {
+        count: external_exports.number().optional(),
+        photos: external_exports.array(external_exports.object({}).passthrough()).optional(),
+        notFound: external_exports.array(external_exports.object({}).passthrough()).optional()
+      }
+    },
+    withErrorHandling(async () => {
+      const result = await manager.getSelectedPhotos();
+      const lines = result.photos.map((p) => {
+        const flags = [];
+        if (p.favorite) flags.push("\u2605");
+        if (p.hidden) flags.push("hidden");
+        if (p.isMovie) flags.push("movie");
+        const flagStr = flags.length ? ` [${flags.join(", ")}]` : "";
+        const dims = p.width && p.height ? ` ${p.width}\xD7${p.height}` : "";
+        return `${p.date ?? "?"} ${p.uuid} \u2014 ${p.filename}${dims}${flagStr}`;
+      });
+      if (result.notFound.length > 0) {
+        lines.push(
+          "",
+          "Selected but not in the library index yet (likely just imported):",
+          ...result.notFound.map((n) => `  ${n.uuid}${n.filename ? ` \u2014 ${n.filename}` : ""}`)
+        );
+      }
+      return successResponse(
+        `${result.count} selected photo(s) in Photos.app:
 
 ${lines.join("\n")}`,
-      { ...result }
-    );
-  }, "get-selected-photos")
-);
-registerTool(
-  "find-duplicates",
-  {
-    description: "Use when: you want to find exact duplicates across the library \u2014 cleaning up after a double import, checking whether files were re-uploaded, or auditing before a migration/export.\nReturns: groupCount (total duplicate groups found), returned (groups in this response, capped at limit, default 100), and groups ordered newest-first \u2014 each with the member UUIDs plus per-member filename, date, size, dimensions, and movie flag. Use get-thumbnail on members to eyeball a group before acting on it.\nDo not use when: you're looking for near-duplicates or similar shots \u2014 Photos' fingerprint matches EXACT duplicates (identical image data) only; edited copies, resized versions, and burst siblings will NOT group.\nSafety: read-only. This server cannot delete photos \u2014 to act on duplicates, quarantine the extra copies into an album (create-album + add-to-album when writes are enabled, otherwise by hand in Photos.app) and review/delete inside Photos.app.",
-    inputSchema: {
-      ...libraryArg,
-      limit: integerNumber().positive().max(1e4).optional().describe("Max duplicate groups to return (default 100; groupCount reports the total)")
+        { ...result }
+      );
+    }, "get-selected-photos")
+  );
+  registerTool(
+    "find-duplicates",
+    {
+      description: "Use when: you want to find exact duplicates across the library \u2014 cleaning up after a double import, checking whether files were re-uploaded, or auditing before a migration/export.\nReturns: groupCount (total duplicate groups found), returned (groups in this response, capped at limit, default 100), and groups ordered newest-first \u2014 each with the member UUIDs plus per-member filename, date, size, dimensions, and movie flag. Use get-thumbnail on members to eyeball a group before acting on it.\nDo not use when: you're looking for near-duplicates or similar shots \u2014 Photos' fingerprint matches EXACT duplicates (identical image data) only; edited copies, resized versions, and burst siblings will NOT group.\nSafety: read-only. This server cannot delete photos \u2014 to act on duplicates, quarantine the extra copies into an album (create-album + add-to-album when writes are enabled, otherwise by hand in Photos.app) and review/delete inside Photos.app.",
+      inputSchema: {
+        ...libraryArg,
+        limit: integerNumber().positive().max(1e4).optional().describe("Max duplicate groups to return (default 100; groupCount reports the total)")
+      },
+      outputSchema: {
+        groupCount: external_exports.number().optional(),
+        returned: external_exports.number().optional(),
+        groups: external_exports.array(external_exports.object({}).passthrough()).optional()
+      }
     },
-    outputSchema: {
-      groupCount: external_exports.number().optional(),
-      returned: external_exports.number().optional(),
-      groups: external_exports.array(external_exports.object({}).passthrough()).optional()
-    }
-  },
-  withErrorHandling(async ({ library, limit }) => {
-    const result = await manager.findDuplicates(limit, library);
-    if (result.groupCount === 0) {
-      return successResponse("No exact duplicates found.", {
-        groupCount: 0,
-        returned: 0,
-        groups: []
-      });
-    }
-    const lines = result.groups.map((g, i) => {
-      const members2 = g.photos.map((m) => `${m.filename}${m.size != null ? ` (${Math.round(m.size / 1024)} KB)` : ""}`).join(" = ");
-      const date5 = g.photos[0]?.date ?? "?";
-      return `${i + 1}. ${g.count}\xD7 ${members2} \u2014 ${date5}
+    withErrorHandling(async ({ library, limit }) => {
+      const result = await manager.findDuplicates(limit, library);
+      if (result.groupCount === 0) {
+        return successResponse("No exact duplicates found.", {
+          groupCount: 0,
+          returned: 0,
+          groups: []
+        });
+      }
+      const lines = result.groups.map((g, i) => {
+        const members2 = g.photos.map((m) => `${m.filename}${m.size != null ? ` (${Math.round(m.size / 1024)} KB)` : ""}`).join(" = ");
+        const date5 = g.photos[0]?.date ?? "?";
+        return `${i + 1}. ${g.count}\xD7 ${members2} \u2014 ${date5}
    ${g.uuids.join(", ")}`;
-    });
-    const header = result.groupCount > result.returned ? `Found ${result.groupCount} duplicate group(s), returning the first ${result.returned} (raise limit for more):` : `Found ${result.groupCount} duplicate group(s):`;
-    return successResponse(`${header}
+      });
+      const header = result.groupCount > result.returned ? `Found ${result.groupCount} duplicate group(s), returning the first ${result.returned} (raise limit for more):` : `Found ${result.groupCount} duplicate group(s):`;
+      return successResponse(`${header}
 
 ${lines.join("\n")}`, { ...result });
-  }, "find-duplicates")
-);
-registerTool(
-  "list-albums",
-  {
-    description: "Use when: you want the catalog of albums \u2014 e.g. to discover exact album names before filtering query by album, or to browse the library's organization.\nReturns: every album's title, folder path, photo count, shared status, and UUID.\nDo not use when: you want the photos inside an album \u2014 use query with the album filter; you want the folder hierarchy rather than albums \u2014 use list-folders; or you just want a total album count \u2014 use library-info.",
-    inputSchema: libraryArg,
-    outputSchema: {
-      count: external_exports.number().optional(),
-      albums: external_exports.array(external_exports.object({}).passthrough()).optional()
-    }
-  },
-  withErrorHandling(async ({ library }) => {
-    const { count, albums } = await manager.listAlbums(library);
-    if (count === 0) return successResponse("No albums.", { count: 0, albums: [] });
-    const lines = albums.map((a) => {
-      const path = a.folder.length ? `${a.folder.join(" / ")} / ` : "";
-      const shared = a.isShared ? " [shared]" : "";
-      return `${path}${a.title} (${a.photoCount})${shared} \u2014 ${a.uuid}`;
-    });
-    return successResponse(`${count} album(s):
+    }, "find-duplicates")
+  );
+  registerTool(
+    "list-albums",
+    {
+      description: "Use when: you want the catalog of albums \u2014 e.g. to discover exact album names before filtering query by album, or to browse the library's organization.\nReturns: every album's title, folder path, photo count, shared status, and UUID.\nDo not use when: you want the photos inside an album \u2014 use query with the album filter; you want the folder hierarchy rather than albums \u2014 use list-folders; or you just want a total album count \u2014 use library-info.",
+      inputSchema: libraryArg,
+      outputSchema: {
+        count: external_exports.number().optional(),
+        albums: external_exports.array(external_exports.object({}).passthrough()).optional()
+      }
+    },
+    withErrorHandling(async ({ library }) => {
+      const { count, albums } = await manager.listAlbums(library);
+      if (count === 0) return successResponse("No albums.", { count: 0, albums: [] });
+      const lines = albums.map((a) => {
+        const path = a.folder.length ? `${a.folder.join(" / ")} / ` : "";
+        const shared = a.isShared ? " [shared]" : "";
+        return `${path}${a.title} (${a.photoCount})${shared} \u2014 ${a.uuid}`;
+      });
+      return successResponse(`${count} album(s):
 
 ${lines.join("\n")}`, { count, albums });
-  }, "list-albums")
-);
-registerTool(
-  "list-folders",
-  {
-    description: "Use when: you want the library's folder hierarchy \u2014 the containers that hold albums and subfolders \u2014 to understand how albums are nested.\nReturns: every folder's title, parent folder, album count, and subfolder count.\nDo not use when: you want the albums themselves (with their photo counts) \u2014 use list-albums; or you just want a total folder count \u2014 use library-info.",
-    inputSchema: libraryArg,
-    outputSchema: {
-      count: external_exports.number().optional(),
-      folders: external_exports.array(external_exports.object({}).passthrough()).optional()
-    }
-  },
-  withErrorHandling(async ({ library }) => {
-    const { count, folders } = await manager.listFolders(library);
-    if (count === 0) return successResponse("No folders.", { count: 0, folders: [] });
-    const lines = folders.map(
-      (f) => `${f.title}${f.parent ? ` (in ${f.parent})` : ""} \u2014 ${f.albumCount} albums, ${f.subfolderCount} subfolders`
-    );
-    return successResponse(`${count} folder(s):
+    }, "list-albums")
+  );
+  registerTool(
+    "list-folders",
+    {
+      description: "Use when: you want the library's folder hierarchy \u2014 the containers that hold albums and subfolders \u2014 to understand how albums are nested.\nReturns: every folder's title, parent folder, album count, and subfolder count.\nDo not use when: you want the albums themselves (with their photo counts) \u2014 use list-albums; or you just want a total folder count \u2014 use library-info.",
+      inputSchema: libraryArg,
+      outputSchema: {
+        count: external_exports.number().optional(),
+        folders: external_exports.array(external_exports.object({}).passthrough()).optional()
+      }
+    },
+    withErrorHandling(async ({ library }) => {
+      const { count, folders } = await manager.listFolders(library);
+      if (count === 0) return successResponse("No folders.", { count: 0, folders: [] });
+      const lines = folders.map(
+        (f) => `${f.title}${f.parent ? ` (in ${f.parent})` : ""} \u2014 ${f.albumCount} albums, ${f.subfolderCount} subfolders`
+      );
+      return successResponse(`${count} folder(s):
 
 ${lines.join("\n")}`, { count, folders });
-  }, "list-folders")
-);
-registerTool(
-  "list-keywords",
-  {
-    description: "Use when: you want the catalog of keywords (tags) in the library \u2014 e.g. to discover exact keyword spellings before filtering query by keyword, or to see which tags are most used. Pass limit for the top-N.\nReturns: keywords with their photo counts, sorted most-used first.\nDo not use when: you want photos carrying a keyword \u2014 use query with the keyword filter; or you want people/faces rather than tags \u2014 use list-persons.",
-    inputSchema: {
-      ...libraryArg,
-      limit: integerNumber().positive().max(1e5).optional().describe("Top-N keywords")
+    }, "list-folders")
+  );
+  registerTool(
+    "list-keywords",
+    {
+      description: "Use when: you want the catalog of keywords (tags) in the library \u2014 e.g. to discover exact keyword spellings before filtering query by keyword, or to see which tags are most used. Pass limit for the top-N.\nReturns: keywords with their photo counts, sorted most-used first.\nDo not use when: you want photos carrying a keyword \u2014 use query with the keyword filter; or you want people/faces rather than tags \u2014 use list-persons.",
+      inputSchema: {
+        ...libraryArg,
+        limit: integerNumber().positive().max(1e5).optional().describe("Top-N keywords")
+      },
+      outputSchema: {
+        count: external_exports.number().optional(),
+        keywords: external_exports.array(external_exports.object({}).passthrough()).optional()
+      }
     },
-    outputSchema: {
-      count: external_exports.number().optional(),
-      keywords: external_exports.array(external_exports.object({}).passthrough()).optional()
-    }
-  },
-  withErrorHandling(async ({ library, limit }) => {
-    const { count, keywords } = await manager.listKeywords(limit, library);
-    if (count === 0) return successResponse("No keywords.", { count: 0, keywords: [] });
-    const lines = keywords.map((k) => `${k.count.toString().padStart(6)}  ${k.keyword}`);
-    return successResponse(`${count} keyword(s):
+    withErrorHandling(async ({ library, limit }) => {
+      const { count, keywords } = await manager.listKeywords(limit, library);
+      if (count === 0) return successResponse("No keywords.", { count: 0, keywords: [] });
+      const lines = keywords.map((k) => `${k.count.toString().padStart(6)}  ${k.keyword}`);
+      return successResponse(`${count} keyword(s):
 
 ${lines.join("\n")}`, { count, keywords });
-  }, "list-keywords")
-);
-registerTool(
-  "list-persons",
-  {
-    description: "Use when: you want the catalog of named people from Photos face recognition \u2014 e.g. to discover exact person names before filtering query by person, or to see who appears most. Pass limit for the top-N; unidentified faces appear as _UNKNOWN_.\nReturns: persons with their photo counts, sorted most-photographed first.\nDo not use when: you want photos of a person \u2014 use query with the person filter; or you want subject tags rather than people \u2014 use list-keywords.",
-    inputSchema: {
-      ...libraryArg,
-      limit: integerNumber().positive().max(1e5).optional().describe("Top-N persons")
+    }, "list-keywords")
+  );
+  registerTool(
+    "list-persons",
+    {
+      description: "Use when: you want the catalog of named people from Photos face recognition \u2014 e.g. to discover exact person names before filtering query by person, or to see who appears most. Pass limit for the top-N; unidentified faces appear as _UNKNOWN_.\nReturns: persons with their photo counts, sorted most-photographed first.\nDo not use when: you want photos of a person \u2014 use query with the person filter; or you want subject tags rather than people \u2014 use list-keywords.",
+      inputSchema: {
+        ...libraryArg,
+        limit: integerNumber().positive().max(1e5).optional().describe("Top-N persons")
+      },
+      outputSchema: {
+        count: external_exports.number().optional(),
+        persons: external_exports.array(external_exports.object({}).passthrough()).optional()
+      }
     },
-    outputSchema: {
-      count: external_exports.number().optional(),
-      persons: external_exports.array(external_exports.object({}).passthrough()).optional()
-    }
-  },
-  withErrorHandling(async ({ library, limit }) => {
-    const { count, persons } = await manager.listPersons(limit, library);
-    if (count === 0) return successResponse("No persons.", { count: 0, persons: [] });
-    const lines = persons.map((p) => `${p.count.toString().padStart(6)}  ${p.name}`);
-    return successResponse(`${count} person(s):
+    withErrorHandling(async ({ library, limit }) => {
+      const { count, persons } = await manager.listPersons(limit, library);
+      if (count === 0) return successResponse("No persons.", { count: 0, persons: [] });
+      const lines = persons.map((p) => `${p.count.toString().padStart(6)}  ${p.name}`);
+      return successResponse(`${count} person(s):
 
 ${lines.join("\n")}`, { count, persons });
-  }, "list-persons")
-);
-registerTool(
-  "export",
-  {
-    description: "Use when: you want to copy one or more photos (by UUID, typically from query) out to a destination directory on disk. By default exports the original; set edited=true for the edited version, live=true to also include the live-photo video, raw=true to also include the raw image. Large batches report per-photo MCP progress notifications when the request carries a progressToken.\nReturns: the destination path, counts of files exported and skipped, the exported file paths, and a per-UUID reason for anything skipped (e.g. file already exists at the destination, UUID not found / in trash, iCloud download failed).\nDo not use when: you only need metadata or file paths rather than copies on disk \u2014 use get-photo; or you're still figuring out which photos to export \u2014 use query first.\nSafety: the only side-effecting tool on the read path \u2014 it writes files into the destination directory (created if missing); the opt-in write tools (APPLE_PHOTOS_MCP_ENABLE_WRITES=1) can also modify the library, but nothing else here writes anywhere. dest must resolve (after expanding ~ and following symlinks) to a path under your home directory, /tmp, /private/tmp, or /Volumes; anything else is rejected. With overwrite=true it OVERWRITES existing files of the same name in place; without it, existing files are skipped and reported per-UUID. If an original isn't on disk (iCloud 'Optimize Mac Storage'), the export falls back to driving Photos.app via AppleScript to download it on demand \u2014 this is slow for large batches and requires Photos.app installed, signed in to iCloud, and Automation permission granted.",
-    inputSchema: {
-      ...libraryArg,
-      uuid: external_exports.array(external_exports.string().max(256)).min(1).max(1e3).describe("Photo UUID(s) to export"),
-      dest: external_exports.string().min(1).max(4096).describe(
-        "Destination directory (created if missing). Must be under the home directory, /tmp, /private/tmp, or /Volumes"
-      ),
-      edited: external_exports.boolean().optional().describe("Export the edited version instead of the original"),
-      live: external_exports.boolean().optional().describe("Also export the live-photo video"),
-      raw: external_exports.boolean().optional().describe("Also export the raw image"),
-      overwrite: external_exports.boolean().optional().describe("Overwrite existing files at the destination")
+    }, "list-persons")
+  );
+  registerTool(
+    "export",
+    {
+      description: "Use when: you want to copy one or more photos (by UUID, typically from query) out to a destination directory on disk. By default exports the original; set edited=true for the edited version, live=true to also include the live-photo video, raw=true to also include the raw image. Large batches report per-photo MCP progress notifications when the request carries a progressToken.\nReturns: the destination path, counts of files exported and skipped, the exported file paths, and a per-UUID reason for anything skipped (e.g. file already exists at the destination, UUID not found / in trash, iCloud download failed).\nDo not use when: you only need metadata or file paths rather than copies on disk \u2014 use get-photo; or you're still figuring out which photos to export \u2014 use query first.\nSafety: the only side-effecting tool on the read path \u2014 it writes files into the destination directory (created if missing); the opt-in write tools (APPLE_PHOTOS_MCP_ENABLE_WRITES=1) can also modify the library, but nothing else here writes anywhere. dest must resolve (after expanding ~ and following symlinks) to a path under your home directory, /tmp, /private/tmp, or /Volumes; anything else is rejected. With overwrite=true it OVERWRITES existing files of the same name in place; without it, existing files are skipped and reported per-UUID. If an original isn't on disk (iCloud 'Optimize Mac Storage'), the export falls back to driving Photos.app via AppleScript to download it on demand \u2014 this is slow for large batches and requires Photos.app installed, signed in to iCloud, and Automation permission granted.",
+      inputSchema: {
+        ...libraryArg,
+        uuid: external_exports.array(external_exports.string().max(256)).min(1).max(1e3).describe("Photo UUID(s) to export"),
+        dest: external_exports.string().min(1).max(4096).describe(
+          "Destination directory (created if missing). Must be under the home directory, /tmp, /private/tmp, or /Volumes"
+        ),
+        edited: external_exports.boolean().optional().describe("Export the edited version instead of the original"),
+        live: external_exports.boolean().optional().describe("Also export the live-photo video"),
+        raw: external_exports.boolean().optional().describe("Also export the raw image"),
+        overwrite: external_exports.boolean().optional().describe("Overwrite existing files at the destination")
+      },
+      outputSchema: {
+        destination: external_exports.string().optional(),
+        exportedCount: external_exports.number().optional(),
+        skippedCount: external_exports.number().optional(),
+        exported: external_exports.array(external_exports.string()).optional(),
+        skipped: external_exports.array(external_exports.object({}).passthrough()).optional()
+      }
     },
-    outputSchema: {
-      destination: external_exports.string().optional(),
-      exportedCount: external_exports.number().optional(),
-      skippedCount: external_exports.number().optional(),
-      exported: external_exports.array(external_exports.string()).optional(),
-      skipped: external_exports.array(external_exports.object({}).passthrough()).optional()
-    }
-  },
-  withErrorHandling(async ({ library, uuid: uuid3, dest, edited, live, raw, overwrite }, extra) => {
-    const progressToken = extra?._meta?.progressToken;
-    const inFlight = [];
-    const onProgress = progressToken === void 0 ? void 0 : (p) => {
-      inFlight.push(
-        extra.sendNotification({
-          method: "notifications/progress",
-          params: {
-            progressToken,
-            progress: p.done,
-            total: p.total,
-            message: p.current ? `Exporting ${p.current} (${p.done + 1}/${p.total})` : `Exported ${p.done}/${p.total}`
-          }
-        }).catch(() => {
-        })
-      );
-    };
-    const result = await manager.exportPhotos(uuid3, dest, {
-      edited,
-      live,
-      raw,
-      overwrite,
-      library,
-      onProgress
-    });
-    if (inFlight.length) {
-      await Promise.all(inFlight);
-    }
-    const lines = [
-      `Destination: ${result.destination}`,
-      `Exported:    ${result.exportedCount} file(s)`,
-      `Skipped:     ${result.skippedCount}`
-    ];
-    if (result.exported.length) {
-      lines.push("", "Files:", ...result.exported.map((f) => `  ${f}`));
-    }
-    if (result.skipped.length) {
-      lines.push("", "Skipped:", ...result.skipped.map((s) => `  ${s.uuid}: ${s.error}`));
-    }
-    return successResponse(lines.join("\n"), { ...result });
-  }, "export")
-);
-var writeAlbumOutput = {
-  album: external_exports.object({
-    uuid: external_exports.string().optional(),
-    name: external_exports.string().optional(),
-    path: external_exports.string().optional()
-  }).passthrough().optional()
-};
-registerTool(
-  "create-album",
-  {
-    description: "Use when: you need an album to file photos into \u2014 a new album by name, optionally nested inside a folder path (e.g. for a quarantine album before a dedupe review, or a per-trip album).\nReturns: album {uuid, name, path} and created \u2014 false means an album of that name already existed and was returned instead of creating a duplicate (idempotent: safe to re-run; without folder the name is matched anywhere in the library, with folder only inside that folder).\nDo not use when: you want to list existing albums \u2014 use list-albums; or you want to put photos into the album \u2014 follow up with add-to-album.\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). Only creates albums/folders; never deletes, moves, or modifies photos. Drives Photos.app via AppleScript: Photos is launched if not running, and macOS Automation permission is required (one-time system prompt on first write). Writes always target the library currently open in Photos.app \u2014 there is no library parameter.",
-    inputSchema: {
-      name: external_exports.string().min(1).max(255).describe("Album name"),
-      folder: external_exports.string().min(1).max(1024).optional().describe(
-        'Folder path to nest the album under, "/"-separated for nesting (e.g. "Trips/2026"); folders are created as needed'
-      )
-    },
-    outputSchema: {
-      ...writeAlbumOutput,
-      created: external_exports.boolean().optional()
-    }
-  },
-  withErrorHandling(async ({ name, folder }) => {
-    const result = await manager.createAlbum(name, folder);
-    const verb = result.created ? "Created album" : "Album already exists";
-    return successResponse(`${verb}: ${result.album.path} (${result.album.uuid})`, {
-      ...result
-    });
-  }, "create-album")
-);
-registerTool(
-  "add-to-album",
-  {
-    description: "Use when: you have photo UUIDs (from query / find-duplicates) and want to file them into an album \u2014 e.g. collecting duplicate extras into a quarantine album, or filing a trip's photos.\nReturns: the album {uuid, name, path}, addedCount, added (UUIDs newly added), alreadyPresent (UUIDs that were already members \u2014 adding is idempotent), and notFound (requested UUIDs that don't exist in the library). Fails only when the album doesn't exist or NO requested photo exists.\nDo not use when: the album doesn't exist yet \u2014 call create-album first; or you want photos OUT of an album \u2014 use remove-from-album.\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). Changes album membership only: photos are never copied, modified, or deleted, and each target is validated to exist first. Max 100 UUIDs per call. Drives Photos.app via AppleScript (launches it if needed; requires macOS Automation permission \u2014 one-time prompt). Writes target the library currently open in Photos.app.",
-    inputSchema: {
-      album: external_exports.string().min(1).max(1024).describe("Album name or UUID (UUID-looking values try the id lookup first)"),
-      uuid: external_exports.array(uuidSchema).min(1).max(100).describe("Photo UUID(s) to add (1\u2013100, as returned by query)")
-    },
-    outputSchema: {
-      ...writeAlbumOutput,
-      addedCount: external_exports.number().optional(),
-      added: external_exports.array(external_exports.string()).optional(),
-      alreadyPresent: external_exports.array(external_exports.string()).optional(),
-      notFound: external_exports.array(external_exports.string()).optional()
-    }
-  },
-  withErrorHandling(async ({ album, uuid: uuid3 }) => {
-    const result = await manager.addToAlbum(album, uuid3);
-    const lines = [
-      `Album:           ${result.album.path} (${result.album.uuid})`,
-      `Added:           ${result.addedCount}`
-    ];
-    if (result.alreadyPresent.length) {
-      lines.push(`Already present: ${result.alreadyPresent.length}`);
-    }
-    if (result.notFound.length) {
-      lines.push(`Not found:       ${result.notFound.join(", ")}`);
-    }
-    return successResponse(lines.join("\n"), { ...result });
-  }, "add-to-album")
-);
-registerTool(
-  "remove-from-album",
-  {
-    description: "Use when: you want to take photos OUT of an album \u2014 undoing a mis-filing, or clearing reviewed items from a quarantine album. This removes ALBUM MEMBERSHIP only.\nReturns: the album AFTER the operation ({uuid, name, path} \u2014 note the uuid CHANGES when anything was removed), removedCount, removed, notInAlbum (requested UUIDs that weren't members \u2014 no-ops), albumRecreated, and previousAlbumUuid.\nDo not use when: you want to delete photos from the library \u2014 this server cannot delete photos at all (quarantine them in an album and review in Photos.app instead); or the photos aren't in the album (harmless, but pointless).\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). NEVER deletes photos from the library \u2014 removed photos stay in All Photos and every other album. Photos' AppleScript has no remove-from-album verb, so the album is REBUILT (same name and remaining photos): its UUID changes and any custom manual sort order is lost; re-fetch the album UUID from the response. When none of the UUIDs are members, nothing is rebuilt. The replacement is built under a scratch name `apple-photos-mcp-tmp-<hex>` and renamed last, so a call killed mid-rebuild (e.g. the 10-minute budget expiring while copying a very large album) leaves the original album and every photo intact but can strand an `apple-photos-mcp-tmp-\u2026` album to delete in Photos.app; each interrupted run strands a distinct one. Max 100 UUIDs per call. Drives Photos.app via AppleScript (requires macOS Automation permission). Writes target the library currently open in Photos.app.",
-    inputSchema: {
-      album: external_exports.string().min(1).max(1024).describe("Album name or UUID (UUID-looking values try the id lookup first)"),
-      uuid: external_exports.array(uuidSchema).min(1).max(100).describe("Photo UUID(s) to remove from the album (1\u2013100)")
-    },
-    outputSchema: {
-      ...writeAlbumOutput,
-      removedCount: external_exports.number().optional(),
-      removed: external_exports.array(external_exports.string()).optional(),
-      notInAlbum: external_exports.array(external_exports.string()).optional(),
-      albumRecreated: external_exports.boolean().optional(),
-      previousAlbumUuid: external_exports.string().optional()
-    }
-  },
-  withErrorHandling(async ({ album, uuid: uuid3 }) => {
-    const result = await manager.removeFromAlbum(album, uuid3);
-    const lines = [
-      `Album:        ${result.album.path} (${result.album.uuid})`,
-      `Removed:      ${result.removedCount} (from the album only \u2014 photos stay in the library)`
-    ];
-    if (result.albumRecreated) {
-      lines.push(
-        `Note:         album rebuilt \u2014 its UUID changed (was ${result.previousAlbumUuid})`
-      );
-    }
-    if (result.notInAlbum.length) {
-      lines.push(`Not in album: ${result.notInAlbum.join(", ")}`);
-    }
-    return successResponse(lines.join("\n"), { ...result });
-  }, "remove-from-album")
-);
-registerTool(
-  "set-photo-metadata",
-  {
-    description: "Use when: you want to set a photo's title, description, or favorite flag \u2014 captioning passes, marking the best shot of a burst, titling scans.\nReturns: uuid, updated (which fields were written), and the full before/after values of all three fields \u2014 so any change can be reverted by writing the before values back.\nDo not use when: you want keywords \u2014 use set-keywords (it has union semantics; this tool doesn't touch keywords); or you only want to READ metadata \u2014 use get-photo.\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). Metadata only \u2014 never touches the image asset, and only the fields you pass are modified (an empty string clears title/description). The target photo is validated to exist first. Drives Photos.app via AppleScript (requires macOS Automation permission). Writes target the library currently open in Photos.app.",
-    inputSchema: {
-      uuid: uuidSchema.describe("Photo UUID (hex-with-dashes, as returned by query)"),
-      title: external_exports.string().max(255).optional().describe("New title (empty string clears it)"),
-      description: external_exports.string().max(2048).optional().describe("New description (empty string clears it)"),
-      favorite: external_exports.boolean().optional().describe("Set or clear the favorite flag")
-    },
-    outputSchema: {
+    withErrorHandling(async ({ library, uuid: uuid3, dest, edited, live, raw, overwrite }, extra) => {
+      const progressToken = extra?._meta?.progressToken;
+      const inFlight = [];
+      const onProgress = progressToken === void 0 ? void 0 : (p) => {
+        inFlight.push(
+          extra.sendNotification({
+            method: "notifications/progress",
+            params: {
+              progressToken,
+              progress: p.done,
+              total: p.total,
+              message: p.current ? `Exporting ${p.current} (${p.done + 1}/${p.total})` : `Exported ${p.done}/${p.total}`
+            }
+          }).catch(() => {
+          })
+        );
+      };
+      const result = await manager.exportPhotos(uuid3, dest, {
+        edited,
+        live,
+        raw,
+        overwrite,
+        library,
+        onProgress
+      });
+      if (inFlight.length) {
+        await Promise.all(inFlight);
+      }
+      const lines = [
+        `Destination: ${result.destination}`,
+        `Exported:    ${result.exportedCount} file(s)`,
+        `Skipped:     ${result.skippedCount}`
+      ];
+      if (result.exported.length) {
+        lines.push("", "Files:", ...result.exported.map((f) => `  ${f}`));
+      }
+      if (result.skipped.length) {
+        lines.push("", "Skipped:", ...result.skipped.map((s) => `  ${s.uuid}: ${s.error}`));
+      }
+      return successResponse(lines.join("\n"), { ...result });
+    }, "export")
+  );
+  const writeAlbumOutput = {
+    album: external_exports.object({
       uuid: external_exports.string().optional(),
-      updated: external_exports.array(external_exports.string()).optional(),
-      before: external_exports.object({}).passthrough().optional(),
-      after: external_exports.object({}).passthrough().optional()
-    }
-  },
-  withErrorHandling(async ({ uuid: uuid3, title, description, favorite }) => {
-    const result = await manager.setPhotoMetadata(uuid3, { title, description, favorite });
-    const lines = [`Updated ${result.updated.join(", ")} on ${result.uuid}:`];
-    for (const field of result.updated) {
-      const key = field;
-      lines.push(
-        `  ${field}: ${JSON.stringify(result.before[key])} \u2192 ${JSON.stringify(result.after[key])}`
-      );
-    }
-    return successResponse(lines.join("\n"), { ...result });
-  }, "set-photo-metadata")
-);
-registerTool(
-  "set-keywords",
-  {
-    description: "Use when: you want to add and/or remove keywords (tags) on a photo \u2014 tagging workflows, fixing a mis-tag \u2014 without disturbing its other keywords.\nReturns: uuid, before/after keyword lists (revert by re-running with the diff inverted), added and removed (what actually changed \u2014 adding an existing keyword or removing an absent one is a no-op), and changed.\nDo not use when: you want to browse keywords \u2014 use list-keywords; or find photos by keyword \u2014 use query. A keyword passed in both add and remove is rejected.\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). UNION semantics \u2014 the photo's current keywords are read first and edits are merged in, so existing keywords you don't mention are ALWAYS preserved (never a blind replace). Metadata only \u2014 the image asset is untouched; the target photo is validated to exist first. Drives Photos.app via AppleScript (requires macOS Automation permission). Writes target the library currently open in Photos.app.",
-    inputSchema: {
-      uuid: uuidSchema.describe("Photo UUID (hex-with-dashes, as returned by query)"),
-      add: external_exports.array(external_exports.string().min(1).max(255)).max(100).optional().describe("Keywords to add (created in Photos if new)"),
-      remove: external_exports.array(external_exports.string().min(1).max(255)).max(100).optional().describe("Keywords to remove from this photo (exact match)")
+      name: external_exports.string().optional(),
+      path: external_exports.string().optional()
+    }).passthrough().optional()
+  };
+  registerTool(
+    "create-album",
+    {
+      description: "Use when: you need an album to file photos into \u2014 a new album by name, optionally nested inside a folder path (e.g. for a quarantine album before a dedupe review, or a per-trip album).\nReturns: album {uuid, name, path} and created \u2014 false means an album of that name already existed and was returned instead of creating a duplicate (idempotent: safe to re-run; without folder the name is matched anywhere in the library, with folder only inside that folder).\nDo not use when: you want to list existing albums \u2014 use list-albums; or you want to put photos into the album \u2014 follow up with add-to-album.\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). Only creates albums/folders; never deletes, moves, or modifies photos. Drives Photos.app via AppleScript: Photos is launched if not running, and macOS Automation permission is required (one-time system prompt on first write). Writes always target the library currently open in Photos.app \u2014 there is no library parameter.",
+      inputSchema: {
+        name: external_exports.string().min(1).max(255).describe("Album name"),
+        folder: external_exports.string().min(1).max(1024).optional().describe(
+          'Folder path to nest the album under, "/"-separated for nesting (e.g. "Trips/2026"); folders are created as needed'
+        )
+      },
+      outputSchema: {
+        ...writeAlbumOutput,
+        created: external_exports.boolean().optional()
+      }
     },
-    outputSchema: {
-      uuid: external_exports.string().optional(),
-      before: external_exports.array(external_exports.string()).optional(),
-      after: external_exports.array(external_exports.string()).optional(),
-      added: external_exports.array(external_exports.string()).optional(),
-      removed: external_exports.array(external_exports.string()).optional(),
-      changed: external_exports.boolean().optional()
-    }
-  },
-  withErrorHandling(async ({ uuid: uuid3, add, remove }) => {
-    const result = await manager.setKeywords(uuid3, { add, remove });
-    const lines = [
-      `Keywords on ${result.uuid}${result.changed ? "" : " (no change needed)"}:`,
-      `  before: ${result.before.length ? result.before.join(", ") : "(none)"}`,
-      `  after:  ${result.after.length ? result.after.join(", ") : "(none)"}`
-    ];
-    if (result.added.length) lines.push(`  added:   ${result.added.join(", ")}`);
-    if (result.removed.length) lines.push(`  removed: ${result.removed.join(", ")}`);
-    return successResponse(lines.join("\n"), { ...result });
-  }, "set-keywords")
-);
-registerTool(
-  "set-photo-date",
-  {
-    description: "Use when: a photo's date/time is wrong and you want to fix it \u2014 trailcam or scanner imports stamped with the upload time, a camera with a mis-set clock, scanned prints. Set an absolute date OR shift by a number of seconds (exactly one of date / shiftSeconds). DRY RUN BY DEFAULT: with dryRun omitted (or true) it only reports the current and would-be dates \u2014 preview first, then re-run with dryRun=false to write.\nReturns: uuid, before and after datetimes (on a dry run, after = the would-be date), shiftSeconds (the effective delta), applied, and dryRun. Revert an applied change by re-running with date=<the echoed before> and dryRun=false.\nDo not use when: you want to find photos by date \u2014 use query; or you expect the file's EXIF to change \u2014 this edits the Photos library date only.\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). Rewrites the photo's date in the Photos LIBRARY DATABASE only \u2014 the same operation as Photos.app's 'Adjust Date & Time'; the original file's EXIF is never modified. Dates are interpreted in the Mac's local timezone (a timezone-aware ISO datetime is converted to local). Nothing is written unless dryRun=false is passed explicitly, and before/after are always echoed so any change can be reverted. The target photo is validated to exist first. Drives Photos.app via AppleScript (requires macOS Automation permission). Writes target the library currently open in Photos.app.",
-    inputSchema: {
-      uuid: uuidSchema.describe("Photo UUID (hex-with-dashes, as returned by query)"),
-      date: external_exports.string().min(4).max(64).optional().describe(
-        "Absolute new date-time, ISO 8601 (e.g. 2026-05-14T06:32:00), interpreted in the Mac's local timezone unless a UTC offset is included. Exactly one of date / shiftSeconds"
-      ),
-      shiftSeconds: integerNumber().min(-32e8).max(32e8).optional().describe(
-        "Shift the current date by this many seconds (negative = earlier; e.g. -86400 = one day back). Exactly one of date / shiftSeconds"
-      ),
-      dryRun: external_exports.boolean().default(true).describe(
-        "Default TRUE: preview the before/after dates without writing anything. Pass false to actually write the new date"
-      )
+    withErrorHandling(async ({ name, folder }) => {
+      const result = await manager.createAlbum(name, folder);
+      const verb = result.created ? "Created album" : "Album already exists";
+      return successResponse(`${verb}: ${result.album.path} (${result.album.uuid})`, {
+        ...result
+      });
+    }, "create-album")
+  );
+  registerTool(
+    "add-to-album",
+    {
+      description: "Use when: you have photo UUIDs (from query / find-duplicates) and want to file them into an album \u2014 e.g. collecting duplicate extras into a quarantine album, or filing a trip's photos.\nReturns: the album {uuid, name, path}, addedCount, added (UUIDs newly added), alreadyPresent (UUIDs that were already members \u2014 adding is idempotent), and notFound (requested UUIDs that don't exist in the library). Fails only when the album doesn't exist or NO requested photo exists.\nDo not use when: the album doesn't exist yet \u2014 call create-album first; or you want photos OUT of an album \u2014 use remove-from-album.\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). Changes album membership only: photos are never copied, modified, or deleted, and each target is validated to exist first. Max 100 UUIDs per call. Drives Photos.app via AppleScript (launches it if needed; requires macOS Automation permission \u2014 one-time prompt). Writes target the library currently open in Photos.app.",
+      inputSchema: {
+        album: external_exports.string().min(1).max(1024).describe("Album name or UUID (UUID-looking values try the id lookup first)"),
+        uuid: external_exports.array(uuidSchema).min(1).max(100).describe("Photo UUID(s) to add (1\u2013100, as returned by query)")
+      },
+      outputSchema: {
+        ...writeAlbumOutput,
+        addedCount: external_exports.number().optional(),
+        added: external_exports.array(external_exports.string()).optional(),
+        alreadyPresent: external_exports.array(external_exports.string()).optional(),
+        notFound: external_exports.array(external_exports.string()).optional()
+      }
     },
-    outputSchema: {
-      uuid: external_exports.string().optional(),
-      before: external_exports.string().optional(),
-      after: external_exports.string().optional(),
-      shiftSeconds: external_exports.number().optional(),
-      applied: external_exports.boolean().optional(),
-      dryRun: external_exports.boolean().optional()
-    }
-  },
-  withErrorHandling(async ({ uuid: uuid3, date: date5, shiftSeconds, dryRun }) => {
-    const result = await manager.setPhotoDate(uuid3, { date: date5, shiftSeconds, dryRun });
-    const lines = [
-      result.applied ? `Date updated on ${result.uuid}:` : `DRY RUN \u2014 nothing written (re-run with dryRun=false to apply). ${result.uuid}:`,
-      `  before: ${result.before}`,
-      `  after:  ${result.after}`,
-      `  shift:  ${result.shiftSeconds} s`
-    ];
-    return successResponse(lines.join("\n"), { ...result });
-  }, "set-photo-date")
-);
-registerTool(
-  "import-photos",
-  {
-    description: "Use when: you have image/video files on disk that belong in the Photos library \u2014 round-trip edits (export \u2192 fix \u2192 import), a folder of scans, an SD-card ingest \u2014 optionally filed straight into an existing album.\nReturns: requestedCount (validated source files), importedCount, imported (uuid + filename per new item \u2014 feed into get-photos / add-to-album / set-photo-date), and the album when one was targeted. importedCount < requestedCount usually means Photos skipped duplicates.\nDo not use when: the target album doesn't exist yet \u2014 call create-album first (a missing album is an error, not auto-created); or the files are outside your home directory, /tmp, /private/tmp, or /Volumes \u2014 those paths are rejected.\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). Only ADDS to the library \u2014 never modifies or deletes anything; source files stay where they are (Photos copies them in). But note the reverse door is closed: Photos' AppleScript has no photo-delete verb, so an import cannot be programmatically undone \u2014 removing a mistaken import requires Photos.app by hand. Every path is validated (absolute, exists, allowed root) before anything imports. Duplicate checking is ON by default; a duplicate then makes Photos.app show a BLOCKING dialog a human must answer (the call waits up to its timeout) \u2014 set skipDuplicateCheck=true only when duplicates are acceptable, because they WILL be re-added silently. Drives Photos.app via AppleScript (requires macOS Automation permission; launches Photos if needed). Imports go into the library currently open in Photos.app.",
-    inputSchema: {
-      paths: external_exports.array(external_exports.string().min(1).max(4096)).min(1).max(50).describe(
-        "Absolute (or ~-prefixed) file paths of images/videos to import (1\u201350). Must exist, under your home directory, /tmp, /private/tmp, or /Volumes"
-      ),
-      album: external_exports.string().min(1).max(1024).optional().describe(
-        "EXISTING album (name or UUID) to file the imports into \u2014 create it with create-album first if needed"
-      ),
-      skipDuplicateCheck: external_exports.boolean().default(false).describe(
-        "true = skip Photos' duplicate check: duplicates WILL be re-imported silently. Default false: Photos checks, and a found duplicate raises a blocking dialog in Photos.app that a human must answer"
-      )
+    withErrorHandling(async ({ album, uuid: uuid3 }) => {
+      const result = await manager.addToAlbum(album, uuid3);
+      const lines = [
+        `Album:           ${result.album.path} (${result.album.uuid})`,
+        `Added:           ${result.addedCount}`
+      ];
+      if (result.alreadyPresent.length) {
+        lines.push(`Already present: ${result.alreadyPresent.length}`);
+      }
+      if (result.notFound.length) {
+        lines.push(`Not found:       ${result.notFound.join(", ")}`);
+      }
+      return successResponse(lines.join("\n"), { ...result });
+    }, "add-to-album")
+  );
+  registerTool(
+    "remove-from-album",
+    {
+      description: "Use when: you want to take photos OUT of an album \u2014 undoing a mis-filing, or clearing reviewed items from a quarantine album. This removes ALBUM MEMBERSHIP only.\nReturns: the album AFTER the operation ({uuid, name, path} \u2014 note the uuid CHANGES when anything was removed), removedCount, removed, notInAlbum (requested UUIDs that weren't members \u2014 no-ops), albumRecreated, and previousAlbumUuid.\nDo not use when: you want to delete photos from the library \u2014 this server cannot delete photos at all (quarantine them in an album and review in Photos.app instead); or the photos aren't in the album (harmless, but pointless).\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). NEVER deletes photos from the library \u2014 removed photos stay in All Photos and every other album. Photos' AppleScript has no remove-from-album verb, so the album is REBUILT (same name and remaining photos): its UUID changes and any custom manual sort order is lost; re-fetch the album UUID from the response. When none of the UUIDs are members, nothing is rebuilt. The replacement is built under a scratch name `apple-photos-mcp-tmp-<hex>` and renamed last, so a call killed mid-rebuild (e.g. the 10-minute budget expiring while copying a very large album) leaves the original album and every photo intact but can strand an `apple-photos-mcp-tmp-\u2026` album to delete in Photos.app; each interrupted run strands a distinct one. Max 100 UUIDs per call. Drives Photos.app via AppleScript (requires macOS Automation permission). Writes target the library currently open in Photos.app.",
+      inputSchema: {
+        album: external_exports.string().min(1).max(1024).describe("Album name or UUID (UUID-looking values try the id lookup first)"),
+        uuid: external_exports.array(uuidSchema).min(1).max(100).describe("Photo UUID(s) to remove from the album (1\u2013100)")
+      },
+      outputSchema: {
+        ...writeAlbumOutput,
+        removedCount: external_exports.number().optional(),
+        removed: external_exports.array(external_exports.string()).optional(),
+        notInAlbum: external_exports.array(external_exports.string()).optional(),
+        albumRecreated: external_exports.boolean().optional(),
+        previousAlbumUuid: external_exports.string().optional()
+      }
     },
-    outputSchema: {
-      requestedCount: external_exports.number().optional(),
-      importedCount: external_exports.number().optional(),
-      imported: external_exports.array(external_exports.object({}).passthrough()).optional(),
-      ...writeAlbumOutput
-    }
-  },
-  withErrorHandling(async ({ paths, album, skipDuplicateCheck }) => {
-    const result = await manager.importPhotos(paths, { album, skipDuplicateCheck });
-    const lines = [
-      `Imported ${result.importedCount} of ${result.requestedCount} file(s)` + (result.album ? ` into ${result.album.path}` : "") + (result.importedCount < result.requestedCount ? " (the difference was likely skipped as duplicates)" : "")
-    ];
-    for (const item of result.imported) {
-      lines.push(`  ${item.uuid}${item.filename ? ` \u2014 ${item.filename}` : ""}`);
-    }
-    return successResponse(lines.join("\n"), { ...result });
-  }, "import-photos")
-);
-registerResourcesAndPrompts(server, manager);
+    withErrorHandling(async ({ album, uuid: uuid3 }) => {
+      const result = await manager.removeFromAlbum(album, uuid3);
+      const lines = [
+        `Album:        ${result.album.path} (${result.album.uuid})`,
+        `Removed:      ${result.removedCount} (from the album only \u2014 photos stay in the library)`
+      ];
+      if (result.albumRecreated) {
+        lines.push(
+          `Note:         album rebuilt \u2014 its UUID changed (was ${result.previousAlbumUuid})`
+        );
+      }
+      if (result.notInAlbum.length) {
+        lines.push(`Not in album: ${result.notInAlbum.join(", ")}`);
+      }
+      return successResponse(lines.join("\n"), { ...result });
+    }, "remove-from-album")
+  );
+  registerTool(
+    "set-photo-metadata",
+    {
+      description: "Use when: you want to set a photo's title, description, or favorite flag \u2014 captioning passes, marking the best shot of a burst, titling scans.\nReturns: uuid, updated (which fields were written), and the full before/after values of all three fields \u2014 so any change can be reverted by writing the before values back.\nDo not use when: you want keywords \u2014 use set-keywords (it has union semantics; this tool doesn't touch keywords); or you only want to READ metadata \u2014 use get-photo.\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). Metadata only \u2014 never touches the image asset, and only the fields you pass are modified (an empty string clears title/description). The target photo is validated to exist first. Drives Photos.app via AppleScript (requires macOS Automation permission). Writes target the library currently open in Photos.app.",
+      inputSchema: {
+        uuid: uuidSchema.describe("Photo UUID (hex-with-dashes, as returned by query)"),
+        title: external_exports.string().max(255).optional().describe("New title (empty string clears it)"),
+        description: external_exports.string().max(2048).optional().describe("New description (empty string clears it)"),
+        favorite: external_exports.boolean().optional().describe("Set or clear the favorite flag")
+      },
+      outputSchema: {
+        uuid: external_exports.string().optional(),
+        updated: external_exports.array(external_exports.string()).optional(),
+        before: external_exports.object({}).passthrough().optional(),
+        after: external_exports.object({}).passthrough().optional()
+      }
+    },
+    withErrorHandling(async ({ uuid: uuid3, title, description, favorite }) => {
+      const result = await manager.setPhotoMetadata(uuid3, { title, description, favorite });
+      const lines = [`Updated ${result.updated.join(", ")} on ${result.uuid}:`];
+      for (const field of result.updated) {
+        const key = field;
+        lines.push(
+          `  ${field}: ${JSON.stringify(result.before[key])} \u2192 ${JSON.stringify(result.after[key])}`
+        );
+      }
+      return successResponse(lines.join("\n"), { ...result });
+    }, "set-photo-metadata")
+  );
+  registerTool(
+    "set-keywords",
+    {
+      description: "Use when: you want to add and/or remove keywords (tags) on a photo \u2014 tagging workflows, fixing a mis-tag \u2014 without disturbing its other keywords.\nReturns: uuid, before/after keyword lists (revert by re-running with the diff inverted), added and removed (what actually changed \u2014 adding an existing keyword or removing an absent one is a no-op), and changed.\nDo not use when: you want to browse keywords \u2014 use list-keywords; or find photos by keyword \u2014 use query. A keyword passed in both add and remove is rejected.\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). UNION semantics \u2014 the photo's current keywords are read first and edits are merged in, so existing keywords you don't mention are ALWAYS preserved (never a blind replace). Metadata only \u2014 the image asset is untouched; the target photo is validated to exist first. Drives Photos.app via AppleScript (requires macOS Automation permission). Writes target the library currently open in Photos.app.",
+      inputSchema: {
+        uuid: uuidSchema.describe("Photo UUID (hex-with-dashes, as returned by query)"),
+        add: external_exports.array(external_exports.string().min(1).max(255)).max(100).optional().describe("Keywords to add (created in Photos if new)"),
+        remove: external_exports.array(external_exports.string().min(1).max(255)).max(100).optional().describe("Keywords to remove from this photo (exact match)")
+      },
+      outputSchema: {
+        uuid: external_exports.string().optional(),
+        before: external_exports.array(external_exports.string()).optional(),
+        after: external_exports.array(external_exports.string()).optional(),
+        added: external_exports.array(external_exports.string()).optional(),
+        removed: external_exports.array(external_exports.string()).optional(),
+        changed: external_exports.boolean().optional()
+      }
+    },
+    withErrorHandling(async ({ uuid: uuid3, add, remove }) => {
+      const result = await manager.setKeywords(uuid3, { add, remove });
+      const lines = [
+        `Keywords on ${result.uuid}${result.changed ? "" : " (no change needed)"}:`,
+        `  before: ${result.before.length ? result.before.join(", ") : "(none)"}`,
+        `  after:  ${result.after.length ? result.after.join(", ") : "(none)"}`
+      ];
+      if (result.added.length) lines.push(`  added:   ${result.added.join(", ")}`);
+      if (result.removed.length) lines.push(`  removed: ${result.removed.join(", ")}`);
+      return successResponse(lines.join("\n"), { ...result });
+    }, "set-keywords")
+  );
+  registerTool(
+    "set-photo-date",
+    {
+      description: "Use when: a photo's date/time is wrong and you want to fix it \u2014 trailcam or scanner imports stamped with the upload time, a camera with a mis-set clock, scanned prints. Set an absolute date OR shift by a number of seconds (exactly one of date / shiftSeconds). DRY RUN BY DEFAULT: with dryRun omitted (or true) it only reports the current and would-be dates \u2014 preview first, then re-run with dryRun=false to write.\nReturns: uuid, before and after datetimes (on a dry run, after = the would-be date), shiftSeconds (the effective delta), applied, and dryRun. Revert an applied change by re-running with date=<the echoed before> and dryRun=false.\nDo not use when: you want to find photos by date \u2014 use query; or you expect the file's EXIF to change \u2014 this edits the Photos library date only.\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). Rewrites the photo's date in the Photos LIBRARY DATABASE only \u2014 the same operation as Photos.app's 'Adjust Date & Time'; the original file's EXIF is never modified. Dates are interpreted in the Mac's local timezone (a timezone-aware ISO datetime is converted to local). Nothing is written unless dryRun=false is passed explicitly, and before/after are always echoed so any change can be reverted. The target photo is validated to exist first. Drives Photos.app via AppleScript (requires macOS Automation permission). Writes target the library currently open in Photos.app.",
+      inputSchema: {
+        uuid: uuidSchema.describe("Photo UUID (hex-with-dashes, as returned by query)"),
+        date: external_exports.string().min(4).max(64).optional().describe(
+          "Absolute new date-time, ISO 8601 (e.g. 2026-05-14T06:32:00), interpreted in the Mac's local timezone unless a UTC offset is included. Exactly one of date / shiftSeconds"
+        ),
+        shiftSeconds: integerNumber().min(-32e8).max(32e8).optional().describe(
+          "Shift the current date by this many seconds (negative = earlier; e.g. -86400 = one day back). Exactly one of date / shiftSeconds"
+        ),
+        dryRun: external_exports.boolean().default(true).describe(
+          "Default TRUE: preview the before/after dates without writing anything. Pass false to actually write the new date"
+        )
+      },
+      outputSchema: {
+        uuid: external_exports.string().optional(),
+        before: external_exports.string().optional(),
+        after: external_exports.string().optional(),
+        shiftSeconds: external_exports.number().optional(),
+        applied: external_exports.boolean().optional(),
+        dryRun: external_exports.boolean().optional()
+      }
+    },
+    withErrorHandling(async ({ uuid: uuid3, date: date5, shiftSeconds, dryRun }) => {
+      const result = await manager.setPhotoDate(uuid3, { date: date5, shiftSeconds, dryRun });
+      const lines = [
+        result.applied ? `Date updated on ${result.uuid}:` : `DRY RUN \u2014 nothing written (re-run with dryRun=false to apply). ${result.uuid}:`,
+        `  before: ${result.before}`,
+        `  after:  ${result.after}`,
+        `  shift:  ${result.shiftSeconds} s`
+      ];
+      return successResponse(lines.join("\n"), { ...result });
+    }, "set-photo-date")
+  );
+  registerTool(
+    "import-photos",
+    {
+      description: "Use when: you have image/video files on disk that belong in the Photos library \u2014 round-trip edits (export \u2192 fix \u2192 import), a folder of scans, an SD-card ingest \u2014 optionally filed straight into an existing album.\nReturns: requestedCount (validated source files), importedCount, imported (uuid + filename per new item \u2014 feed into get-photos / add-to-album / set-photo-date), and the album when one was targeted. importedCount < requestedCount usually means Photos skipped duplicates.\nDo not use when: the target album doesn't exist yet \u2014 call create-album first (a missing album is an error, not auto-created); or the files are outside your home directory, /tmp, /private/tmp, or /Volumes \u2014 those paths are rejected.\nSafety: WRITE tool \u2014 disabled unless APPLE_PHOTOS_MCP_ENABLE_WRITES=1 (run doctor to check). Only ADDS to the library \u2014 never modifies or deletes anything; source files stay where they are (Photos copies them in). But note the reverse door is closed: Photos' AppleScript has no photo-delete verb, so an import cannot be programmatically undone \u2014 removing a mistaken import requires Photos.app by hand. Every path is validated (absolute, exists, allowed root) before anything imports. Duplicate checking is ON by default; a duplicate then makes Photos.app show a BLOCKING dialog a human must answer (the call waits up to its timeout) \u2014 set skipDuplicateCheck=true only when duplicates are acceptable, because they WILL be re-added silently. Drives Photos.app via AppleScript (requires macOS Automation permission; launches Photos if needed). Imports go into the library currently open in Photos.app.",
+      inputSchema: {
+        paths: external_exports.array(external_exports.string().min(1).max(4096)).min(1).max(50).describe(
+          "Absolute (or ~-prefixed) file paths of images/videos to import (1\u201350). Must exist, under your home directory, /tmp, /private/tmp, or /Volumes"
+        ),
+        album: external_exports.string().min(1).max(1024).optional().describe(
+          "EXISTING album (name or UUID) to file the imports into \u2014 create it with create-album first if needed"
+        ),
+        skipDuplicateCheck: external_exports.boolean().default(false).describe(
+          "true = skip Photos' duplicate check: duplicates WILL be re-imported silently. Default false: Photos checks, and a found duplicate raises a blocking dialog in Photos.app that a human must answer"
+        )
+      },
+      outputSchema: {
+        requestedCount: external_exports.number().optional(),
+        importedCount: external_exports.number().optional(),
+        imported: external_exports.array(external_exports.object({}).passthrough()).optional(),
+        ...writeAlbumOutput
+      }
+    },
+    withErrorHandling(async ({ paths, album, skipDuplicateCheck }) => {
+      const result = await manager.importPhotos(paths, { album, skipDuplicateCheck });
+      const lines = [
+        `Imported ${result.importedCount} of ${result.requestedCount} file(s)` + (result.album ? ` into ${result.album.path}` : "") + (result.importedCount < result.requestedCount ? " (the difference was likely skipped as duplicates)" : "")
+      ];
+      for (const item of result.imported) {
+        lines.push(`  ${item.uuid}${item.filename ? ` \u2014 ${item.filename}` : ""}`);
+      }
+      return successResponse(lines.join("\n"), { ...result });
+    }, "import-photos")
+  );
+  registerResourcesAndPrompts(server, manager);
+  return server;
+}
+function useHttpTransport() {
+  return process.argv.includes("--http") || (process.env.APPLE_PHOTOS_MCP_TRANSPORT ?? "").trim().toLowerCase() === "http";
+}
 async function main() {
+  const http = useHttpTransport();
   process.on("uncaughtException", (err) => {
-    if (err?.code === "EPIPE") {
+    if (!http && err?.code === "EPIPE") {
       killActiveSidecars();
       process.exit(0);
     }
@@ -39495,13 +41908,35 @@ async function main() {
   };
   process.on("SIGTERM", () => shutdown("SIGTERM"));
   process.on("SIGINT", () => shutdown("SIGINT"));
+  if (http) {
+    const token = loadBearerToken();
+    const port = httpPort();
+    await startHttpServer({ port, token, createServer: createServer2 });
+    console.error(
+      `apple-photos-mcp v${version2} listening on http://127.0.0.1:${port}/mcp` + (READ_ONLY ? " (strict read-only)" : "")
+    );
+    const started = Date.now();
+    manager.getLibraryInfo().then(() => console.error(`[warmup] sidecar ready in ${Date.now() - started}ms`)).catch(
+      (err) => console.error(`[warmup] failed: ${err instanceof Error ? err.message : String(err)}`)
+    );
+    return;
+  }
   process.stdin.on("end", () => shutdown("stdin EOF"));
   process.stdin.on("close", () => shutdown("stdin close"));
   const transport = withJsonSchema2020_12(new StdioServerTransport());
-  await server.connect(transport);
+  await createServer2().connect(transport);
   console.error(`apple-photos-mcp v${version2} running on stdio`);
 }
 main().catch((error62) => {
-  console.error("Fatal error:", error62);
+  console.error("Fatal error:", error62 instanceof Error ? error62.message : error62);
   process.exit(1);
 });
+/*! Bundled license information:
+
+content-type/index.js:
+  (*!
+   * content-type
+   * Copyright(c) 2015 Douglas Christopher Wilson
+   * MIT Licensed
+   *)
+*/
